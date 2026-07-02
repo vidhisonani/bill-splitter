@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import GroupDetail from "./pages/GroupDetail";
 
 function App() {
 
@@ -13,7 +15,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <h1>Dashboard</h1>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/groups/:id" element={
+          <ProtectedRoute>
+            <GroupDetail />
           </ProtectedRoute>
         } />
       </Routes>

@@ -1,16 +1,54 @@
-# React + Vite
+# SplitEase — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the SplitEase bill splitting app.
 
-Currently, two official plugins are available:
+## Tech Stack
+- React 18 + Vite
+- Tailwind CSS v4
+- React Router v6
+- Axios
+- React Icons (Heroicons hi2)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Setup
 
-## React Compiler
+1. Install dependencies:
+   ```
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Create a `.env` file:
+    ```
+   VITE_API_URL=http://localhost:5000/api
+   ````
 
-## Expanding the ESLint configuration
+3. Run in development:
+   ```
+   npm run dev
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Pages
+
+| Route | Page | Protected |
+|-------|------|-----------|
+| /login | Login | No |
+| /register | Register | No |
+| /dashboard | Dashboard | Yes |
+| /groups/:id | Group Detail | Yes |
+| /groups | All Groups | Yes |
+
+## Folder Structure
+```
+client/src/
+├── api/            # Axios instance + interceptor
+├── components/     # ProtectedRoute, reusable UI
+├── context/        # AuthContext (JWT + localStorage)
+├── pages/          # One file per route
+└── App.jsx         # Router setup
+```
+## Key Concepts Used
+- JWT auth with localStorage persistence
+- Axios interceptor auto-attaches token to every request
+- React Context for global auth state
+- Protected routes redirect to /login if no token
+- useParams() for dynamic route IDs
+- useEffect() for data fetching on mount
