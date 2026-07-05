@@ -214,15 +214,15 @@ export default function GroupDetail() {
         <div className='grid grid-cols-3 gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
-            <div className='text-sm font-medium text-gray-500'>{totalExpense()}</div>
+            <div className='text-sm font-medium text-gray-500'>₹{totalExpense()}</div>
           </div>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>You Paid</div>
-            <div className='text-sm font-medium text-green-400'>{myPaid()}</div>
+            <div className='text-sm font-medium text-green-400'>₹{myPaid()}</div>
           </div>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>You Are Owed</div>
-            <div className='text-sm font-medium text-red-400'>{youOwed()}</div>
+            <div className='text-sm font-medium text-red-400'>₹{youOwed()}</div>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-6">
