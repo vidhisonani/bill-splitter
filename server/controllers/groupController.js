@@ -1,5 +1,6 @@
 const Group = require("../models/Group");
 const User = require("../models/User");
+const Expense = require("../models/Expense");
 
 exports.createGroup = async (req, res) => {
   try {
@@ -20,7 +21,37 @@ exports.getMyGroups = async (req, res) => {
     const groups = await Group.find({ members: req.user._id })
       .populate("members", "firstName lastName email")
       .populate("createdBy", "firstName lastName email");
-    return res.status(200).json({ message: "Group Fetched", groups });
+
+    const groupsWithBalances = [];
+
+    for (let group of groups) {
+      const expenses = await Expense.find({ group: group._id });
+      let userBalance = 0;
+
+      expenses.forEach(exp => {
+        const paidById = exp.paidBy?.toString();
+        const amount = exp.amount;
+        const splitAmongIds = exp.splitAmong?.map(id => id.toString()) || [];
+        const splitCount = splitAmongIds.length;
+        if (splitCount === 0) return;
+
+        const share = amount / splitCount;
+
+        if (paidById === req.user._id.toString()) {
+          userBalance += amount;
+        }
+
+        if (splitAmongIds.includes(req.user._id.toString())) {
+          userBalance -= share;
+        }
+      });
+
+      const groupObj = group.toObject();
+      groupObj.userBalance = userBalance;
+      groupsWithBalances.push(groupObj);
+    }
+
+    return res.status(200).json({ message: "Group Fetched", groups: groupsWithBalances });
 
   } catch (err) {
     console.log("Error while fetching group: ", err)

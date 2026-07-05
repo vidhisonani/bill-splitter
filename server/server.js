@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require('./routes/groupRoutes')
+const { groupExpenseRouter, expenseRouter } = require('./routes/expenseRoutes');
 
 connectDB();
 
@@ -17,6 +18,9 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/groups/:id/expenses", groupExpenseRouter);
+app.use("/api/expenses", expenseRouter);
+
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

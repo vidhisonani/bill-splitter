@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import Sidebar from "../components/Sidebar";
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import Sidebar from '../components/Sidebar';
-import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus } from 'react-icons/hi2';
+import { HiOutlinePlus } from "react-icons/hi2";
+import { useState, useEffect } from "react";
+import api from "../api";
 
-function Dashboard() {
+export default function Groups() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -25,7 +25,6 @@ function Dashboard() {
     };
     fetchGroups();
   }, []);
-
   const getInitials = (firstName, lastName) =>
     `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
@@ -47,76 +46,30 @@ function Dashboard() {
     }
   };
 
-  let totalOwed = 0;
-  let totalOwe = 0;
-  groups.forEach(group => {
-    const bal = group.userBalance ?? 0;
-    if (bal > 0) {
-      totalOwed += bal;
-    } else if (bal < 0) {
-      totalOwe += Math.abs(bal);
-    }
-  });
-
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="text-gray-400 text-sm">Loading...</div>
     </div>
   );
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-
-      {/* Main  */}
       <main className="ml-56 flex-1 px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Welcome back, {user?.firstName}!
+              All Groups
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              Here is a summary of your shared expenses.
+              All your groups in one place.
             </p>
           </div>
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
-            + Add Expense
-          </button>
         </div>
-
-        {/* Balance  */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total owed to you</p>
-              <p className="text-2xl font-bold text-emerald-500">+₹{totalOwed.toFixed(2)}</p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500">
-              <HiOutlineArrowUpRight className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total you owe</p>
-              <p className="text-2xl font-bold text-red-500">-₹{totalOwe.toFixed(2)}</p>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500">
-              <HiOutlineArrowDownLeft className="w-5 h-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Groups  */}
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Your Groups</h2>
-          <Link to="/groups" className="text-sm text-indigo-600 hover:text-indigo-700">
-            View all
-          </Link>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Create new group card */}
           <button onClick={() => setShowModal(true)}
-          className="bg-white rounded-xl border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 p-6 flex flex-col items-center justify-center gap-2 transition group">
+            className="bg-white rounded-xl border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 p-6 flex flex-col items-center justify-center gap-2 transition group">
             <div className="w-10 h-10 rounded-full bg-gray-100 group-hover:bg-indigo-100 flex items-center justify-center text-gray-400 group-hover:text-indigo-500 text-xl transition">
               <HiOutlinePlus className="w-5 h-5" />
             </div>
@@ -127,7 +80,7 @@ function Dashboard() {
           </button>
 
           {/* Group cards */}
-          {groups.slice(0, 3).map((group, index) => (
+          {groups.map((group, index) => (
             <Link
               key={group._id}
               to={`/groups/${group._id}`}
@@ -228,6 +181,4 @@ function Dashboard() {
       )}
     </div>
   );
-}
-
-export default Dashboard;
+}   
