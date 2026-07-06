@@ -7,6 +7,7 @@ import GroupDetail from "./pages/GroupDetail";
 import Groups from "./pages/Groups";
 import Expenses from "./pages/Expenses";
 import Home from "./pages/Home";
+import Settings from "./pages/Settings";
 
 function App() {
 
@@ -40,6 +41,11 @@ function App() {
           </ProtectedRoute>
         }
         />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )

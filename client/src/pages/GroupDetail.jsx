@@ -132,15 +132,15 @@ export default function GroupDetail() {
       setExpenseLoading(false);
     }
   }
-  
-  const totalExpense =  () => {
-    try{
+
+  const totalExpense = () => {
+    try {
       let totalAmount = 0;
       expenses.forEach(expense => {
         totalAmount += expense.amount;
       });
       return totalAmount;
-    }catch(err){
+    } catch (err) {
       console.log(err);
     }
   }
@@ -148,21 +148,58 @@ export default function GroupDetail() {
   const myPaid = () => {
     let totalAmount = 0;
     expenses.forEach(expense => {
-      if(expense.paidBy._id === user._id){
+      if (expense.paidBy._id === user._id) {
         totalAmount += expense.amount;
       }
     })
     return totalAmount;
   }
+
   const youOwed = () => {
     let totalAmount = 0;
     expenses.forEach(expense => {
-      if(expense.paidBy._id !== user._id){
-        totalAmount += expense.amount;
+      const paidByMe = expense.paidBy?._id === user._id;
+      const involved = expense.splitAmong?.some(m => m._id === user._id);
+      if (!paidByMe && involved) {
+        totalAmount += expense.amount / (expense.splitAmong?.length || 1);
       }
-    })
-    return totalAmount/(group?.members.length);
-  }
+    });
+    return totalAmount;
+  };
+
+  const getSimplifiedDebts = () => {
+    const balances = getBalances();
+    if (balances.length === 0) return [];
+
+    const creditors = balances
+      .filter(b => b.balance > 0.01)
+      .map(b => ({ member: b.member, amount: b.balance }))
+      .sort((a, b) => b.amount - a.amount);
+
+    const debtors = balances
+      .filter(b => b.balance < -0.01)
+      .map(b => ({ member: b.member, amount: Math.abs(b.balance) }))
+      .sort((a, b) => b.amount - a.amount);
+
+    const transactions = [];
+    let i = 0, j = 0;
+
+    while (i < debtors.length && j < creditors.length) {
+      const amount = Math.min(debtors[i].amount, creditors[j].amount);
+      transactions.push({
+        from: debtors[i].member,
+        to: creditors[j].member,
+        amount: amount.toFixed(2)
+      });
+      debtors[i].amount -= amount;
+      creditors[j].amount -= amount;
+      if (debtors[i].amount < 0.01) i++;
+      if (creditors[j].amount < 0.01) j++;
+    }
+
+    return transactions;
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="text-gray-400 text-sm">Loading...</div>
@@ -214,15 +251,15 @@ export default function GroupDetail() {
         <div className='grid grid-cols-3 gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
-            <div className='text-sm font-medium text-gray-500'>₹{totalExpense()}</div>
+            <div className='text-sm font-medium text-gray-500'>₹{totalExpense().toFixed(2)}</div>
           </div>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>You Paid</div>
-            <div className='text-sm font-medium text-green-400'>₹{myPaid()}</div>
+            <div className='text-sm font-medium text-green-400'>₹{myPaid().toFixed(2)}</div>
           </div>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>You Are Owed</div>
-            <div className='text-sm font-medium text-red-400'>₹{youOwed()}</div>
+            <div className='text-sm font-medium text-red-400'>₹{youOwed().toFixed(2)}</div>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-6">
@@ -392,6 +429,32 @@ export default function GroupDetail() {
                           </div>
                         );
                       })}
+                      {/* Simplified settlement plan */}
+                      {getSimplifiedDebts().length > 0 && (
+                        <div className="mt-6 bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+                          <p className="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-3">
+                            Simplified settlement plan
+                          </p>
+                          <div className="space-y-2">
+                            {getSimplifiedDebts().map((t, i) => (
+                              <div key={i} className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-indigo-50">
+                                <span className="text-sm text-slate-600">
+                                  <span className="font-semibold text-slate-900">
+                                    {t.from._id === user._id ? "You" : `${t.from.firstName} ${t.from.lastName} `}
+                                    {" "}
+                                  </span>
+                                  <span>{t.from._id === user._id ? "pay" : "pays"}</span>
+                                  {" to "}
+                                  <span className="font-semibold text-slate-900">
+                                    {t.to._id === user._id ? "you" : `${t.to.firstName} ${t.to.lastName}`}
+                                  </span>
+                                </span>
+                                <span className="font-bold text-indigo-600">₹{t.amount}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 )}
@@ -400,6 +463,8 @@ export default function GroupDetail() {
           </div>
         </div>
       </main>
+
+      {/* Add expense form */}
       {showExpenseModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
