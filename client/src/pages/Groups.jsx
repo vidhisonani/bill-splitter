@@ -1,7 +1,7 @@
 import Sidebar from "../components/Sidebar";
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlinePlus } from "react-icons/hi2";
+import { HiOutlinePlus, HiOutlineExclamationTriangle } from "react-icons/hi2";
 import { useState, useEffect } from "react";
 import api from "../api";
 
@@ -10,23 +10,35 @@ export default function Groups() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [groupForm, setGroupForm] = useState({ name: "", description: "" });
-  const { user } = useAuth();
+  const [groupError, setGroupError] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const response = await api.get("/groups");
         setGroups(response.data.groups);
+        setGroupError("");
       } catch (err) {
         console.log(err);
+        setGroupError(err?.response?.data?.message || "Failed to fetch groups. Please try again.");
       } finally {
         setLoading(false);
       }
     };
     fetchGroups();
   }, []);
-  const getInitials = (firstName, lastName) =>
-    `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+
+  const getInitials = (firstName, lastName) => {
+    if (lastName !== undefined) {
+      return `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+    }
+    const parts = (firstName ?? "").trim().split(/\s+/);
+    return parts.length >= 2
+      ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+      : (parts[0]?.[0] ?? "").toUpperCase();
+  };
 
   const avatarColors = [
     "bg-indigo-500", "bg-pink-500", "bg-emerald-500",
@@ -35,6 +47,8 @@ export default function Groups() {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
+    setCreating(true);
+    setCreateError("");
     try {
       const response = await api.post("/groups", groupForm);
       const newGroup = { ...response.data.group, userBalance: 0 };
@@ -43,6 +57,9 @@ export default function Groups() {
       setGroupForm({ name: "", description: "" });
     } catch (err) {
       console.log(err);
+      setCreateError(err?.response?.data?.message || "Failed to create group. Please try again.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -66,6 +83,12 @@ export default function Groups() {
             </p>
           </div>
         </div>
+        {groupError && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <HiOutlineExclamationTriangle className="w-4 h-4 shrink-0" />
+            <span>{groupError}</span>
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Create new group card */}
           <button onClick={() => setShowModal(true)}
@@ -79,7 +102,13 @@ export default function Groups() {
             <p className="text-xs text-gray-400">Start splitting with friends</p>
           </button>
 
-          {/* Group cards */}
+          {/* {groups.length === 0 && !groupError && (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-gray-700 font-medium">No groups yet</p>
+              <p className="text-sm text-gray-400 mt-1">Create your first group to start splitting bills!</p>
+            </div>
+          )} */}
+
           {groups.map((group, index) => (
             <Link
               key={group._id}
@@ -88,7 +117,7 @@ export default function Groups() {
             >
               <div className="flex items-start justify-between">
                 <div className={`w-10 h-10 rounded-lg ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-white text-sm font-bold`}>
-                  {group.name[0].toUpperCase()}
+                  {getInitials(group.name)}
                 </div>
                 {group.userBalance > 0 ? (
                   <span className="text-sm font-semibold text-emerald-500">+₹{group.userBalance.toFixed(2)}</span>
@@ -123,6 +152,7 @@ export default function Groups() {
               </div>
             </Link>
           ))}
+
         </div>
       </main>
       {showModal && (
@@ -170,11 +200,15 @@ export default function Groups() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition"
+                  disabled={creating}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium transition"
                 >
-                  Create Group
+                  {creating ? "Creating…" : "Create Group"}
                 </button>
               </div>
+              {createError && (
+                <p className="text-sm text-red-500 mt-2 text-center">{createError}</p>
+              )}
             </form>
           </div>
         </div>

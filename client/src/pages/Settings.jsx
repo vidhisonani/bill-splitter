@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MdPerson, MdEmail, MdLock, MdSave, MdSecurity, MdManageAccounts, MdCheckCircle, MdError, } from 'react-icons/md';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
@@ -63,6 +64,9 @@ export default function Settings() {
     }
   };
 
+  const getInitials = (firstName, lastName) =>
+    `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -74,89 +78,202 @@ export default function Settings() {
 
         <div className="max-w-2xl space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-5">Edit Profile</h2>
+            <div className="flex items-center gap-2 mb-5">
+              <MdManageAccounts size={20} className="text-indigo-500" />
+              <h2 className="text-base font-semibold text-gray-900">Edit Profile</h2>
+            </div>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold select-none">
+                {getInitials(user?.firstName, user?.lastName)}
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-sm text-gray-500">{user?.email}</p>
+              </div>
+            </div>
+
             <form onSubmit={handleProfileSubmit} className="space-y-5">
-              {profileError && <p className="text-red-500 text-sm">{profileError}</p>}
-              {profileSuccess && <p className="text-green-500 text-sm">{profileSuccess}</p>}
+              {profileError && (
+                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
+                  <MdError size={18} className="shrink-0" />
+                  {profileError}
+                </div>
+              )}
+              {profileSuccess && (
+                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-sm text-green-600">
+                  <MdCheckCircle size={18} className="shrink-0" />
+                  {profileSuccess}
+                </div>
+              )}
+
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1.5">
                   First Name
                 </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  id="firstName"
-                  value={profileForm.firstName}
-                  onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
-                  required
-                  placeholder="Vidhi"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdPerson size={18} />
+                  </span>
+                  <input
+                    type="text"
+                    name="firstName"
+                    id="firstName"
+                    value={profileForm.firstName}
+                    onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                    required
+                    placeholder="Vidhi"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
+                </div>
               </div>
+
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Last Name
                 </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  id="lastName"
-                  value={profileForm.lastName}
-                  onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
-                  required
-                  placeholder="Patel"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdPerson size={18} />
+                  </span>
+                  <input
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    value={profileForm.lastName}
+                    onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                    required
+                    placeholder="Patel"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
+                </div>
               </div>
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                   Email
                 </label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                  required
-                  placeholder="you@example.com"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdEmail size={18} />
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    id="email"
+                    value={profileForm.email}
+                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    required
+                    placeholder="you@example.com"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
+                </div>
               </div>
+
               <button
                 type="submit"
                 disabled={profileLoading}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+                className="cursor-pointer w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
               >
+                <MdSave size={18} />
                 {profileLoading ? "Updating..." : "Update Profile"}
               </button>
             </form>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-base font-semibold text-gray-900 mb-5">Change Password</h2>
+            <div className="flex items-center gap-2 mb-5">
+              <MdSecurity size={20} className="text-indigo-500" />
+              <h2 className="text-base font-semibold text-gray-900">Change Password</h2>
+            </div>
+
             <form onSubmit={handlePasswordSubmit} className="space-y-5">
-              {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
-              {passwordSuccess && <p className="text-green-500 text-sm">{passwordSuccess}</p>}
+              {passwordError && (
+                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
+                  <MdError size={18} className="shrink-0" />
+                  {passwordError}
+                </div>
+              )}
+              {passwordSuccess && (
+                <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-sm text-green-600">
+                  <MdCheckCircle size={18} className="shrink-0" />
+                  {passwordSuccess}
+                </div>
+              )}
+
               <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
-                <div>
-                  <input className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" type="password" name="currentPassword" id="currentPassword" value={passwordForm.currentPassword} onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })} required minLength={6} placeholder="Current Password" />
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdLock size={18} />
+                  </span>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    id="currentPassword"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    required
+                    minLength={6}
+                    placeholder="Current password"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
                 </div>
               </div>
+
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
-                <div>
-                  <input className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" type="password" name="newPassword" id="newPassword" value={passwordForm.newPassword} onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} minLength={6} required placeholder="New Password" />
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  New Password
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdLock size={18} />
+                  </span>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    id="newPassword"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    required
+                    minLength={6}
+                    placeholder="At least 6 characters"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
                 </div>
               </div>
+
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
-                <div>
-                  <input className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" type="password" name="confirmPassword" id="confirmPassword" value={passwordForm.confirmPassword} onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} minLength={6} required placeholder="Confirm Password" />
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+                    <MdLock size={18} />
+                  </span>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    required
+                    minLength={6}
+                    placeholder="Re-enter new password"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                  />
                 </div>
               </div>
-              <button type="submit" disabled={passwordLoading} className="w-full px-3.5 py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="cursor-pointer w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+              >
+                <MdSecurity size={18} />
                 {passwordLoading ? "Updating..." : "Update Password"}
               </button>
             </form>

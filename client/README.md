@@ -7,7 +7,7 @@ React + Vite frontend for the SplitEase bill splitting app.
 - Tailwind CSS v4
 - React Router v6
 - Axios
-- React Icons (Heroicons hi2)
+- React Icons (Heroicons hi2, Material Design icons md)
 
 ## Setup
 

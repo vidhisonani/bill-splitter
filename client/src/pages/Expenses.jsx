@@ -3,7 +3,7 @@ import Sidebar from "../components/Sidebar";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 import { Link } from 'react-router-dom';
-import { HiOutlineSearch, HiOutlineAdjustments } from 'react-icons/hi';
+import { HiOutlineExclamationTriangle, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 
 export default function Expenses() {
   const [myExpenses, setMyExpenses] = useState([]);
@@ -11,6 +11,7 @@ export default function Expenses() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filterType, setFilterType] = useState("all");
+  const [expenseError, setExpenseError] = useState("");
   const { user } = useAuth();
 
   useEffect(() => {
@@ -18,8 +19,10 @@ export default function Expenses() {
       try {
         const response = await api.get("/expenses")
         setMyExpenses(response.data.expenses);
+        setExpenseError("");
       } catch (err) {
         console.log(err);
+        setExpenseError(err?.response?.data?.message || "Failed to fetch expenses. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -62,7 +65,7 @@ export default function Expenses() {
       const q = search.toLowerCase();
       result = result.filter(e =>
         e.title.toLowerCase().includes(q) ||
-        e.group?.name.toLowerCase().includes(q) ||
+        e.group?.name?.toLowerCase().includes(q) ||
         e.paidBy?.firstName?.toLowerCase().includes(q)
       );
     }
@@ -108,7 +111,7 @@ export default function Expenses() {
         <div className="flex flex-col sm:flex-row gap-3 mb-5">
           {/* Search */}
           <div className="relative flex-1">
-            <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               value={search}
@@ -128,11 +131,10 @@ export default function Expenses() {
               <button
                 key={f.value}
                 onClick={() => setFilterType(f.value)}
-                className={`px-3 py-2 text-xs font-medium rounded-lg border transition ${
-                  filterType === f.value
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
-                }`}
+                className={`px-3 py-2 text-xs font-medium rounded-lg border transition ${filterType === f.value
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                  }`}
               >
                 {f.label}
               </button>
@@ -156,9 +158,14 @@ export default function Expenses() {
         {search || filterType !== "all" ? (
           <p className="text-xs text-gray-400 mb-3">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
         ) : null}
-
+        {expenseError && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <HiOutlineExclamationTriangle className="w-4 h-4 shrink-0" />
+            <span>{expenseError}</span>
+          </div>
+        )}
         {/* Expense list */}
-        {filtered.length === 0 ? (
+        {filtered.length === 0 && !expenseError ? (
           <div className="flex flex-col items-center justify-center py-12 bg-white rounded-xl border border-gray-200">
             <p className="text-gray-500 font-medium">No expenses found</p>
             <p className="text-sm text-gray-400 mt-1">
@@ -177,10 +184,10 @@ export default function Expenses() {
                     <h3 className="font-medium text-gray-900">{expense.title}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Link
-                        to={`/groups/${expense.group._id}`}
+                        to={`/groups/${expense.group?._id}`}
                         className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full hover:bg-indigo-100 transition"
                       >
-                        {expense.group.name}
+                        {expense.group?.name}
                       </Link>
                       <span className="text-xs text-gray-400">
                         {new Date(expense.createdAt).toLocaleDateString()}

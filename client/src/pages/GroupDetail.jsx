@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineArrowLeft, HiOutlineUserPlus } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash } from 'react-icons/hi2';
 import Sidebar from '../components/Sidebar';
 
 export default function GroupDetail() {
@@ -25,6 +25,7 @@ export default function GroupDetail() {
     paidBy: "",
     splitAmong: []
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchGroupAndExpenses = async () => {
     try {
@@ -133,6 +134,15 @@ export default function GroupDetail() {
     }
   }
 
+  const handleDeleteGroup = async () => {
+    try {
+      await api.delete(`/groups/${id}`);
+      navigate("/groups");
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   const totalExpense = () => {
     try {
       let totalAmount = 0;
@@ -232,7 +242,7 @@ export default function GroupDetail() {
                 <p className="text-sm text-gray-500 mt-1">{group.description}</p>
               )}
             </div>
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+            <button className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
               onClick={() => {
                 setExpenseForm({
                   title: "",
@@ -248,6 +258,7 @@ export default function GroupDetail() {
             </button>
           </div>
         </div>
+        {/* stats cards */}
         <div className='grid grid-cols-3 gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
@@ -307,12 +318,23 @@ export default function GroupDetail() {
                 <button
                   type="submit"
                   disabled={memberLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium py-2 rounded-lg transition"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer"
                 >
                   {memberLoading ? "Adding..." : "Add Member"}
                 </button>
               </form>
             </div>
+
+            {/* Delete Group */}
+            {group.createdBy._id === user._id && (
+              <div className='bg-white rounded-xl border border-gray-200 p-5'>
+                <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <HiOutlineTrash className='w-5 h-5'/> Want to delete this group?
+                </h2>
+                <p className='text-xs text-red-500 mb-3'>Warning: All the data will be lost.</p>
+                <button className='bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition w-full cursor-pointer' onClick={() => setShowDeleteModal(true)}>Delete Group</button>
+              </div>
+            )}
           </div>
 
           {/* Right column: tabs */}
@@ -596,6 +618,34 @@ export default function GroupDetail() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* delete confirmation */}
+      {showDeleteModal && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>
+          <div className="bg-white p-6 rounded-lg w-80">
+            <h2 className="text-xl font-semibold mb-3">
+              Delete Group?
+            </h2>
+            <p className="text-gray-600 mb-4">
+              All group data will be permanently deleted.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border rounded cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteGroup}
+                className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

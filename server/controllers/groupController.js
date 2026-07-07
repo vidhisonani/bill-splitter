@@ -76,19 +76,19 @@ exports.getGroupById = async (req, res) => {
 }
 
 exports.addMember = async (req, res) => {
-  try{
-    const {email} = req.body;
-    const groupId = req.params.id; 
+  try {
+    const { email } = req.body;
+    const groupId = req.params.id;
     const group = await Group.findById(groupId);
-    if(!group){
-      return res.status(404).json({message: "Group not found"});
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
     }
-    const member = await User.findOne({email});
-    if(!member){
-      return res.status(404).json({message: "Member not found"});
+    const member = await User.findOne({ email });
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
     }
-    if(group.members.includes(member._id)){
-      return res.status(400).json({message: "Member already exists in group"});
+    if (group.members.includes(member._id)) {
+      return res.status(400).json({ message: "Member already exists in group" });
     }
     group.members.push(member._id);
     await group.save();
@@ -98,6 +98,28 @@ exports.addMember = async (req, res) => {
     return res.status(200).json({ message: "Member added successfully", group: updatedGroup });
   } catch (err) {
     console.log("Error while adding a member", err);
+    return res.status(500).json({ message: "Internal Server Error" })
+  }
+}
+
+exports.deleteGroup = async (req, res) => {
+  try {
+    const groupId = req.params.id;
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    if (group.createdBy.toString() === req.user._id.toString()) {
+      await Expense.deleteMany({ group: groupId });
+      await group.deleteOne();
+      return res.status(200).json({ message: "Group deleted successfully" });
+    }
+    else {
+      return res.status(403).json({ message: "You are not authorized to delete this group" });
+    }
+  }
+  catch (err) {
+    console.log("Error while deleting group", err);
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
