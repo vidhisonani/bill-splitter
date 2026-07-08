@@ -8,6 +8,7 @@ import Groups from "./pages/Groups";
 import Expenses from "./pages/Expenses";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
+import Friends from "./pages/Friends";
 
 function App() {
 
@@ -46,6 +47,11 @@ function App() {
             <Settings />
           </ProtectedRoute>
         } />
+        <Route path="/friends" element={
+          <ProtectedRoute>
+            <Friends />
+          </ProtectedRoute>
+        }/>
       </Routes>
     </BrowserRouter>
   )

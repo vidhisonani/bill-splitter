@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MdEmail, MdLock, MdPerson, MdPersonAdd, MdReceiptLong } from 'react-icons/md';
+import { MdEmail, MdLock, MdPerson, MdPersonAdd, MdReceiptLong, MdError } from 'react-icons/md';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -78,11 +78,7 @@ function Register() {
             </p>
           </div>
 
-          {error && (
-            <div className="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          import { MdError } from 'react-icons/md';
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">

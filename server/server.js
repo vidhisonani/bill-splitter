@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require('./routes/groupRoutes')
 const { groupExpenseRouter, expenseRouter } = require('./routes/expenseRoutes');
+const friendRoutes = require('./routes/friendRoutes');
 
 connectDB();
 
@@ -20,7 +21,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/groups", groupRoutes);
 app.use("/api/groups/:id/expenses", groupExpenseRouter);
 app.use("/api/expenses", expenseRouter);
-
+app.use("/api/friends", friendRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash, HiOutlineExclamationTriangle } from 'react-icons/hi2';
+import { MdError } from 'react-icons/md';
 import Sidebar from '../components/Sidebar';
 
 export default function GroupDetail() {
@@ -11,6 +12,7 @@ export default function GroupDetail() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState(null);
+  const [error, setError] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [memberError, setMemberError] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
@@ -37,11 +39,11 @@ export default function GroupDetail() {
         paidBy: prev.paidBy || user._id,
         splitAmong: prev.splitAmong.length > 0 ? prev.splitAmong : groupRes.data.group.members.map(m => m._id)
       }));
-
       const expensesRes = await api.get(`/groups/${id}/expenses`);
       setExpenses(expensesRes.data.expenses);
     } catch (err) {
       console.log(err);
+      setError(err.response?.data?.message || "Failed to fetch group data");
     } finally {
       setLoading(false);
     }
@@ -134,12 +136,13 @@ export default function GroupDetail() {
     }
   }
 
-  const handleDeleteGroup = async () => {
+  const handleDeleteGroup = async () => { 
     try {
       await api.delete(`/groups/${id}`);
       navigate("/groups");
     } catch (err) {
-      console.log(err);
+      setError(err.response?.data?.message || "Failed to delete group.");
+      setShowDeleteModal(false);
     }
   }
 
@@ -258,6 +261,12 @@ export default function GroupDetail() {
             </button>
           </div>
         </div>
+        {error && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600 mb-6">
+            <HiOutlineExclamationTriangle size={18} className="shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
         {/* stats cards */}
         <div className='grid grid-cols-3 gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
@@ -304,7 +313,10 @@ export default function GroupDetail() {
                 <HiOutlineUserPlus className="w-4 h-4" /> Add Member
               </h2>
               {memberError && (
-                <p className="text-xs text-red-500 mb-3">{memberError}</p>
+                <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
+                  <MdError size={16} />
+                  <p>{memberError}</p>
+                </div>
               )}
               <form onSubmit={handleAddMember} className="space-y-3">
                 <input
@@ -329,7 +341,7 @@ export default function GroupDetail() {
             {group.createdBy._id === user._id && (
               <div className='bg-white rounded-xl border border-gray-200 p-5'>
                 <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <HiOutlineTrash className='w-5 h-5'/> Want to delete this group?
+                  <HiOutlineTrash className='w-5 h-5' /> Want to delete this group?
                 </h2>
                 <p className='text-xs text-red-500 mb-3'>Warning: All the data will be lost.</p>
                 <button className='bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition w-full cursor-pointer' onClick={() => setShowDeleteModal(true)}>Delete Group</button>
@@ -494,7 +506,10 @@ export default function GroupDetail() {
             <p className="text-sm text-gray-500 mb-5">Add a new expense to the group.</p>
 
             {expenseError && (
-              <p className="text-xs text-red-500 mb-3 bg-red-50 p-2.5 rounded-lg border border-red-100">{expenseError}</p>
+              <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
+                <MdError size={16} />
+                <p>{expenseError}</p>
+              </div>
             )}
 
             <form onSubmit={handleAddExpense} className="space-y-4">

@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   HiOutlineSquares2X2, HiOutlineUsers, HiOutlineCurrencyRupee,
-  HiOutlineCog6Tooth, HiOutlineArrowRightOnRectangle
+  HiOutlineCog6Tooth, HiOutlineArrowRightOnRectangle, HiOutlineUserGroup
 } from 'react-icons/hi2';
 
 export default function Sidebar() {
@@ -22,6 +22,7 @@ export default function Sidebar() {
     { to: "/dashboard", icon: HiOutlineSquares2X2, label: "Dashboard" },
     { to: "/groups", icon: HiOutlineUsers, label: "Groups" },
     { to: "/expenses", icon: HiOutlineCurrencyRupee, label: "Expenses" },
+    { to: "/friends", icon: HiOutlineUserGroup, label: "Friends" },
     { to: "/settings", icon: HiOutlineCog6Tooth, label: "Settings" },
   ];
 
