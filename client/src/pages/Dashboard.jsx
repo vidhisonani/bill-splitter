@@ -75,7 +75,7 @@ function Dashboard() {
       <Sidebar />
 
       {/* Main  */}
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
@@ -85,10 +85,10 @@ function Dashboard() {
               Here is a summary of your shared expenses.
             </p>
           </div>
-          <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer">
+          {/* <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer">
             <HiOutlinePlus className="w-5 h-5" strokeWidth='3px' />
             Add Expense
-          </button>
+          </button> */}
         </div>
 
         {/* Balance  */}
@@ -99,7 +99,7 @@ function Dashboard() {
           </div>
         )}
         {!error && (
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total owed to you</p>

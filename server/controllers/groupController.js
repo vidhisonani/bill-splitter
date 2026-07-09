@@ -1,6 +1,7 @@
 const Group = require("../models/Group");
 const User = require("../models/User");
 const Expense = require("../models/Expense");
+const FriendRequest = require("../models/FriendRequest");
 
 exports.createGroup = async (req, res) => {
   try {
@@ -89,6 +90,16 @@ exports.addMember = async (req, res) => {
     }
     if (group.members.includes(member._id)) {
       return res.status(400).json({ message: "Member already exists in group" });
+    }
+    const areFriends = await FriendRequest.findOne({
+      $or: [
+        { sender: req.user._id, receiver: member._id },
+        { sender: member._id, receiver: req.user._id }
+      ],
+      status: "accepted"
+    });
+    if (!areFriends) {
+      return res.status(400).json({ message: "You can only add friends to groups. Send them a friend request first." });
     }
     group.members.push(member._id);
     await group.save();

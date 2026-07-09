@@ -34,7 +34,8 @@ exports.getGroupExpenses = async (req, res) => {
     const expenses = await Expense.find({ group: groupId })
       .populate("paidBy", "firstName lastName email")
       .populate("splitAmong", "firstName lastName email")
-      .populate("createdBy", "firstName lastName email");
+      .populate("createdBy", "firstName lastName email")
+      .sort({ createdAt: -1 });;
     return res.status(200).json({ message: "Expenses fetched successfully", expenses });
   } catch (err) {
     console.log("Error while fetching expense", err);

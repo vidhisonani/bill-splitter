@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash, HiOutlineExclamationTriangle } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash, HiOutlineExclamationTriangle, HiOutlineCheck } from 'react-icons/hi2';
 import { MdError } from 'react-icons/md';
 import Sidebar from '../components/Sidebar';
 
@@ -19,6 +19,7 @@ export default function GroupDetail() {
   const [activeTab, setActiveTab] = useState("expenses");
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [expenseError, setExpenseError] = useState("");
+  const [expenseSuccess, setExpenseSuccess] = useState(false);
   const [expenses, setExpenses] = useState([]);
   const [expenseLoading, setExpenseLoading] = useState(false);
   const [expenseForm, setExpenseForm] = useState({
@@ -128,15 +129,18 @@ export default function GroupDetail() {
         paidBy: user._id,
         splitAmong: group?.members.map(m => m._id) || []
       });
+      setExpenseSuccess(true);
       fetchGroupAndExpenses();
+      setTimeout(() => setExpenseSuccess(false), 3000);
     } catch (err) {
       setExpenseError(err.response?.data?.message || "Something went wrong");
+      setExpenseSuccess(false);
     } finally {
       setExpenseLoading(false);
     }
   }
 
-  const handleDeleteGroup = async () => { 
+  const handleDeleteGroup = async () => {
     try {
       await api.delete(`/groups/${id}`);
       navigate("/groups");
@@ -230,7 +234,7 @@ export default function GroupDetail() {
       <Sidebar />
 
       {/* Main */}
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         {/* Back button + header */}
         <div className="mb-6">
           <button
@@ -268,7 +272,7 @@ export default function GroupDetail() {
           </div>
         )}
         {/* stats cards */}
-        <div className='grid grid-cols-3 gap-6 mb-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
             <div className='text-sm font-medium text-gray-500'>₹{totalExpense().toFixed(2)}</div>
@@ -282,9 +286,9 @@ export default function GroupDetail() {
             <div className='text-sm font-medium text-red-400'>₹{youOwed().toFixed(2)}</div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-6">
           {/* Left column: members + add member */}
-          <div className="col-span-1 space-y-4">
+          <div className="col-span-1 space-y-4 order-2 sm:order-none">
             {/* Members card */}
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <h2 className="text-sm font-semibold text-gray-900 mb-4">
@@ -350,7 +354,7 @@ export default function GroupDetail() {
           </div>
 
           {/* Right column: tabs */}
-          <div className="col-span-2">
+          <div className="col-span-2 order-1 sm:order-none">
             <div className="bg-white rounded-xl border border-gray-200">
               {/* Tabs */}
               <div className="flex border-b border-gray-200 px-5">
@@ -640,7 +644,7 @@ export default function GroupDetail() {
       {/* delete confirmation */}
       {showDeleteModal && (
         <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>
-          <div className="bg-white p-6 rounded-lg w-80">
+          <div className="bg-white p-6 rounded-lg w-72 sm:w-80">
             <h2 className="text-xl font-semibold mb-3">
               Delete Group?
             </h2>
@@ -659,6 +663,27 @@ export default function GroupDetail() {
                 className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* expense success */}
+      {expenseSuccess && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-70 sm:w-80">
+            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+              <HiOutlineCheck className="w-5 h-5 text-green-600" strokeWidth='2px' />
+            </div>
+            <h2 className="text-center text-xl font-semibold mb-3">Expense Added!</h2>
+            <p className="text-center text-gray-600 mb-4">Your expense has been added successfully.</p>
+            <div className="flex justify-center gap-2 mt-5">
+              <button
+                onClick={() => setExpenseSuccess(false)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded cursor-pointer hover:bg-indigo-700 transition"
+              >
+                OK
               </button>
             </div>
           </div>

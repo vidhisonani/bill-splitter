@@ -72,7 +72,7 @@ export default function Groups() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">

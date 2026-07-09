@@ -86,14 +86,14 @@ export default function Expenses() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         {/* Heading */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">All Expenses</h1>
           <p className="text-sm text-gray-500 mt-0.5">Every expense you're part of, across all groups.</p>
         </div>
         {/*state cards  */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <p className="text-xs text-gray-500 mb-1">Total expenses</p>
             <p className="text-xl font-bold text-gray-900">{myExpenses.length}</p>

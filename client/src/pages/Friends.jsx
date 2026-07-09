@@ -85,7 +85,7 @@ export default function Friends() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
@@ -104,7 +104,7 @@ export default function Friends() {
         </div>
 
         {/* balances */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total owed to you</p>
@@ -128,8 +128,8 @@ export default function Friends() {
             </div>
           </div>
         </div>
-
-        {(requests.length > 0 || sentRequests.length > 0) && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-3">Friend Requests</h2>
           <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
             {/* Tab headers */}
             <div className="flex gap-4 border-b border-gray-200 mb-4">
@@ -232,8 +232,7 @@ export default function Friends() {
               )
             )}
           </div>
-        )}
-
+        </div>
         {/* Friends list */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">

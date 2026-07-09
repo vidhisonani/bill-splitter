@@ -1,11 +1,19 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MdPerson, MdEmail, MdLock, MdSave, MdSecurity, MdManageAccounts, MdCheckCircle, MdError, } from 'react-icons/md';
+import { HiOutlineArrowRightOnRectangle } from 'react-icons/hi2';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const [profileForm, setProfileForm] = useState({
     firstName: user?.firstName || "",
@@ -70,7 +78,7 @@ export default function Settings() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      <main className="ml-56 flex-1 px-8 py-8">
+      <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage your account details.</p>
@@ -277,6 +285,24 @@ export default function Settings() {
                 {passwordLoading ? "Updating..." : "Update Password"}
               </button>
             </form>
+          </div>
+
+          {/* Logout Section */}
+          <div className="bg-white rounded-xl border border-red-100 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <HiOutlineArrowRightOnRectangle size={20} className="text-red-500" />
+              <h2 className="text-base font-semibold text-gray-900">Sign Out</h2>
+            </div>
+            <p className="text-sm text-gray-500 mb-5">
+              Done using SplitEase? You can log out from your current device here.
+            </p>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-red-200 text-red-600 font-medium hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition cursor-pointer select-none"
+            >
+              <HiOutlineArrowRightOnRectangle size={18} />
+              Log Out
+            </button>
           </div>
 
         </div>
