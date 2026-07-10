@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus, HiOutlineCheck, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { MdError } from 'react-icons/md';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function Friends() {
   const { user } = useAuth();
@@ -76,11 +77,7 @@ export default function Friends() {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="text-gray-400 text-sm">Loading...</div>
-    </div>
-  );
+  if (loading) return <LoadingScreen />
 
   return (
     <div className="flex min-h-screen bg-gray-50">

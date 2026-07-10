@@ -10,7 +10,12 @@ exports.createGroup = async (req, res) => {
       return res.status(400).json({ message: "Name is required" })
     }
     const group = await Group.create({ name, description, createdBy: req.user._id, members: [req.user._id] });
-    return res.status(201).json({ message: "Group Created", group });
+    const populatedGroup = await Group.findById(group._id)
+      .populate("members", "firstName lastName email")
+      .populate("createdBy", "firstName lastName email");
+    const groupObj = populatedGroup.toObject();
+    groupObj.userBalance = 0;
+    return res.status(201).json({ message: "Group Created", group: groupObj });
   } catch (err) {
     console.log("Error while creating group: ", err)
     return res.status(500).json({ message: "Internal Server Error" })
@@ -51,7 +56,7 @@ exports.getMyGroups = async (req, res) => {
       groupObj.userBalance = userBalance;
       groupsWithBalances.push(groupObj);
     }
-
+    groupsWithBalances.sort((a, b) => b.createdAt - a.createdAt);
     return res.status(200).json({ message: "Group Fetched", groups: groupsWithBalances });
 
   } catch (err) {

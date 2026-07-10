@@ -5,6 +5,7 @@ import { HiOutlineArrowRightOnRectangle } from 'react-icons/hi2';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { getInitials } from '../utils/avatar';
 
 export default function Settings() {
   const { user, updateUser, logout } = useAuth();
@@ -71,9 +72,6 @@ export default function Settings() {
       setPasswordLoading(false);
     }
   };
-
-  const getInitials = (firstName, lastName) =>
-    `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
   return (
     <div className="flex min-h-screen bg-gray-50">

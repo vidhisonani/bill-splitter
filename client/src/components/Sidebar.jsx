@@ -5,6 +5,7 @@ import {
   HiOutlineSquares2X2, HiOutlineUsers, HiOutlineCurrencyRupee,
   HiOutlineCog6Tooth, HiOutlineArrowRightOnRectangle, HiOutlineUserGroup
 } from 'react-icons/hi2';
+import { getInitials } from '../utils/avatar';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
@@ -27,9 +28,6 @@ export default function Sidebar() {
     logout();
     navigate("/login");
   };
-
-  const getInitials = (firstName, lastName) =>
-    `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
   const isActive = (to) =>
     location.pathname === to ||

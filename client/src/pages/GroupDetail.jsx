@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineArrowLeft, HiOutlineUserPlus, HiOutlineTrash, HiOutlineExclamationTriangle, HiOutlineCheck } from 'react-icons/hi2';
-import { MdError } from 'react-icons/md';
+import { HiOutlineArrowLeft, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import Sidebar from '../components/Sidebar';
+import DeleteGroupModal from '../components/DeleteGroupModal';
+import AddExpenseModal from '../components/AddExpenseModal';
+import MembersCard from '../components/MembersCard';
+import AddMemberCard from '../components/AddMemberCard';
+import { getInitials, avatarColors } from '../utils/avatar';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function GroupDetail() {
   const { id } = useParams();
@@ -13,33 +18,13 @@ export default function GroupDetail() {
   const [loading, setLoading] = useState(true);
   const [group, setGroup] = useState(null);
   const [error, setError] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [memberError, setMemberError] = useState("");
-  const [memberLoading, setMemberLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("expenses");
-  const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const [expenseError, setExpenseError] = useState("");
-  const [expenseSuccess, setExpenseSuccess] = useState(false);
   const [expenses, setExpenses] = useState([]);
-  const [expenseLoading, setExpenseLoading] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({
-    title: "",
-    amount: "",
-    paidBy: "",
-    splitAmong: []
-  });
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchGroupAndExpenses = async () => {
     try {
       const groupRes = await api.get(`/groups/${id}`);
       setGroup(groupRes.data.group);
-
-      setExpenseForm(prev => ({
-        ...prev,
-        paidBy: prev.paidBy || user._id,
-        splitAmong: prev.splitAmong.length > 0 ? prev.splitAmong : groupRes.data.group.members.map(m => m._id)
-      }));
       const expensesRes = await api.get(`/groups/${id}/expenses`);
       setExpenses(expensesRes.data.expenses);
     } catch (err) {
@@ -54,13 +39,6 @@ export default function GroupDetail() {
     fetchGroupAndExpenses();
   }, [id]);
 
-  const getInitials = (firstName, lastName) =>
-    `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
-
-  const avatarColors = [
-    "bg-indigo-500", "bg-pink-500", "bg-emerald-500",
-    "bg-amber-500", "bg-sky-500", "bg-violet-500"
-  ];
 
   const getBalances = () => {
     if (!group || expenses.length === 0) return [];
@@ -96,59 +74,6 @@ export default function GroupDetail() {
       colorClass: avatarColors[index % avatarColors.length]
     }));
   };
-
-  const handleAddMember = async (e) => {
-    e.preventDefault();
-    setMemberError("");
-    setMemberLoading(true);
-    try {
-      const response = await api.post(`/groups/${id}/members`, { email: memberEmail });
-      setGroup(response.data.group);
-      setMemberEmail("");
-    } catch (err) {
-      setMemberError(err.response?.data?.message || "Something went wrong");
-    } finally {
-      setMemberLoading(false);
-    }
-  };
-
-  const handleAddExpense = async (e) => {
-    e.preventDefault();
-    if (expenseForm.splitAmong.length === 0) {
-      setExpenseError("Please select at least one member to split the expense with.");
-      return;
-    }
-    setExpenseError("");
-    setExpenseLoading(true);
-    try {
-      await api.post(`/groups/${id}/expenses`, expenseForm);
-      setShowExpenseModal(false);
-      setExpenseForm({
-        title: "",
-        amount: "",
-        paidBy: user._id,
-        splitAmong: group?.members.map(m => m._id) || []
-      });
-      setExpenseSuccess(true);
-      fetchGroupAndExpenses();
-      setTimeout(() => setExpenseSuccess(false), 3000);
-    } catch (err) {
-      setExpenseError(err.response?.data?.message || "Something went wrong");
-      setExpenseSuccess(false);
-    } finally {
-      setExpenseLoading(false);
-    }
-  }
-
-  const handleDeleteGroup = async () => {
-    try {
-      await api.delete(`/groups/${id}`);
-      navigate("/groups");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete group.");
-      setShowDeleteModal(false);
-    }
-  }
 
   const totalExpense = () => {
     try {
@@ -217,11 +142,7 @@ export default function GroupDetail() {
     return transactions;
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="text-gray-400 text-sm">Loading...</div>
-    </div>
-  );
+  if (loading) return <LoadingScreen />
 
   if (!group) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -232,7 +153,6 @@ export default function GroupDetail() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-
       {/* Main */}
       <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         {/* Back button + header */}
@@ -248,21 +168,15 @@ export default function GroupDetail() {
               {group.description && (
                 <p className="text-sm text-gray-500 mt-1">{group.description}</p>
               )}
+              {group.createdAt && (
+                <p className="text-sm text-gray-400 mt-1"> Created on {new Date(group.createdAt).toLocaleDateString("en-US", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}</p>
+              )}
             </div>
-            <button className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
-              onClick={() => {
-                setExpenseForm({
-                  title: "",
-                  amount: "",
-                  paidBy: user._id,
-                  splitAmong: group?.members.map(m => m._id) || []
-                });
-                setExpenseError("");
-                setShowExpenseModal(true);
-              }}
-            >
-              + Add Expense
-            </button>
+            <AddExpenseModal id={group._id} user={user} group={group} fetchGroupAndExpenses={fetchGroupAndExpenses} />
           </div>
         </div>
         {error && (
@@ -290,67 +204,11 @@ export default function GroupDetail() {
           {/* Left column: members + add member */}
           <div className="col-span-1 space-y-4 order-2 sm:order-none">
             {/* Members card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="text-sm font-semibold text-gray-900 mb-4">
-                Members ({group.members.length})
-              </h2>
-              <div className="space-y-3">
-                {group.members.map((member, i) => (
-                  <div key={member._id} className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-white text-xs font-medium`}>
-                      {getInitials(member.firstName, member.lastName)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {member.firstName} {member.lastName}
-                      </p>
-                      <p className="text-xs text-gray-400">{member.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            <MembersCard members={group.members} />
             {/* Add member card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <HiOutlineUserPlus className="w-4 h-4" /> Add Member
-              </h2>
-              {memberError && (
-                <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
-                  <MdError size={16} />
-                  <p>{memberError}</p>
-                </div>
-              )}
-              <form onSubmit={handleAddMember} className="space-y-3">
-                <input
-                  type="email"
-                  value={memberEmail}
-                  onChange={(e) => setMemberEmail(e.target.value)}
-                  placeholder="friend@example.com"
-                  required
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
-                <button
-                  type="submit"
-                  disabled={memberLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium py-2 rounded-lg transition cursor-pointer"
-                >
-                  {memberLoading ? "Adding..." : "Add Member"}
-                </button>
-              </form>
-            </div>
-
+            <AddMemberCard id={group._id} fetchGroupAndExpenses={fetchGroupAndExpenses} />
             {/* Delete Group */}
-            {group.createdBy._id === user._id && (
-              <div className='bg-white rounded-xl border border-gray-200 p-5'>
-                <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <HiOutlineTrash className='w-5 h-5' /> Want to delete this group?
-                </h2>
-                <p className='text-xs text-red-500 mb-3'>Warning: All the data will be lost.</p>
-                <button className='bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 rounded-lg transition w-full cursor-pointer' onClick={() => setShowDeleteModal(true)}>Delete Group</button>
-              </div>
-            )}
+            <DeleteGroupModal id={group._id} group={group} />
           </div>
 
           {/* Right column: tabs */}
@@ -501,194 +359,6 @@ export default function GroupDetail() {
           </div>
         </div>
       </main>
-
-      {/* Add expense form */}
-      {showExpenseModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Add Expense</h2>
-            <p className="text-sm text-gray-500 mb-5">Add a new expense to the group.</p>
-
-            {expenseError && (
-              <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
-                <MdError size={16} />
-                <p>{expenseError}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleAddExpense} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Expense description <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={expenseForm.title}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })}
-                  placeholder="e.g. Goa Dinner, Grocery, Fuel"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Amount (₹) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="0.01"
-                  step="0.01"
-                  value={expenseForm.amount}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
-                  placeholder="0.00"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Paid by <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={expenseForm.paidBy}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, paidBy: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm cursor-pointer"
-                >
-                  {group.members.map(m => (
-                    <option key={m._id} value={m._id}>
-                      {m._id === user._id ? "You" : `${m.firstName} ${m.lastName}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Split among <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setExpenseForm({ ...expenseForm, splitAmong: group.members.map(m => m._id) })}
-                      className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
-                    >
-                      Select All
-                    </button>
-                    <span className="text-gray-300 text-xs">|</span>
-                    <button
-                      type="button"
-                      onClick={() => setExpenseForm({ ...expenseForm, splitAmong: [] })}
-                      className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
-                    >
-                      Select None
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                  {group.members.map((m) => {
-                    const isChecked = expenseForm.splitAmong.includes(m._id);
-                    return (
-                      <label key={m._id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => {
-                            const updated = e.target.checked
-                              ? [...expenseForm.splitAmong, m._id]
-                              : expenseForm.splitAmong.filter(id => id !== m._id);
-                            setExpenseForm({ ...expenseForm, splitAmong: updated });
-                          }}
-                          className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                        <span>{m._id === user._id ? "You" : `${m.firstName} ${m.lastName}`}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowExpenseModal(false);
-                    setExpenseForm({
-                      title: "",
-                      amount: "",
-                      paidBy: user._id,
-                      splitAmong: group?.members.map(m => m._id) || []
-                    });
-                    setExpenseError("");
-                  }}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={expenseLoading}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium transition"
-                >
-                  {expenseLoading ? "Adding..." : "Add Expense"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* delete confirmation */}
-      {showDeleteModal && (
-        <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>
-          <div className="bg-white p-6 rounded-lg w-72 sm:w-80">
-            <h2 className="text-xl font-semibold mb-3">
-              Delete Group?
-            </h2>
-            <p className="text-gray-600 mb-4">
-              All group data will be permanently deleted.
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border rounded cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteGroup}
-                className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* expense success */}
-      {expenseSuccess && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-70 sm:w-80">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
-              <HiOutlineCheck className="w-5 h-5 text-green-600" strokeWidth='2px' />
-            </div>
-            <h2 className="text-center text-xl font-semibold mb-3">Expense Added!</h2>
-            <p className="text-center text-gray-600 mb-4">Your expense has been added successfully.</p>
-            <div className="flex justify-center gap-2 mt-5">
-              <button
-                onClick={() => setExpenseSuccess(false)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded cursor-pointer hover:bg-indigo-700 transition"
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
