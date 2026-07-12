@@ -30,6 +30,9 @@ export default function GroupDetail() {
     } catch (err) {
       console.log(err);
       setError(err.response?.data?.message || "Failed to fetch group data");
+      if (err.response?.status === 404 || err.response?.status === 403) {
+        navigate('/dashboard');
+      }
     } finally {
       setLoading(false);
     }
@@ -144,11 +147,11 @@ export default function GroupDetail() {
 
   if (loading) return <LoadingScreen />
 
-  if (!group) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="text-gray-400 text-sm">Group not found.</div>
-    </div>
-  );
+  // if (!group) return (
+  //   <div className="flex items-center justify-center min-h-screen bg-gray-50">
+  //     <div className="text-gray-400 text-sm">Group not found.</div>
+  //   </div>
+  // );
 
   return (
     <div className="flex min-h-screen bg-gray-50">

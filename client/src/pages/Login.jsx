@@ -36,7 +36,6 @@ function Login() {
     try {
       const response = await api.post("/auth/login", formData);
       login(response.data);
-      navigate("/dashboard");
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";
       setError(message);
@@ -90,6 +89,8 @@ function Login() {
                   onChange={handleChange}
                   required
                   placeholder="you@example.com"
+                  autoFocus
+                  autoComplete="email"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
               </div>
@@ -112,6 +113,7 @@ function Login() {
                   required
                   minLength={6}
                   placeholder="At least 6 characters"
+                  autoComplete="current-password"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
               </div>
@@ -120,7 +122,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition"
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition cursor-pointer"
             >
               <MdLogin size={18} />
               {loading ? "Logging In..." : "Log In"}

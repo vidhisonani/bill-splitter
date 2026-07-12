@@ -78,8 +78,6 @@ function Register() {
             </p>
           </div>
 
-          import { MdError } from 'react-icons/md';
-
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -192,7 +190,7 @@ function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition"
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition cursor-pointer"
             >
               <MdPersonAdd size={18} />
               {loading ? "Creating account..." : "Create account"}

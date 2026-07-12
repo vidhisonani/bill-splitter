@@ -19,7 +19,7 @@ export default function Expenses() {
     const fetchExpenses = async () => {
       try {
         const response = await api.get("/expenses")
-        setMyExpenses(response.data.expenses);
+        setMyExpenses(response.data.expenses || []);
         setExpenseError("");
       } catch (err) {
         console.log(err);
@@ -37,12 +37,12 @@ export default function Expenses() {
   ];
 
   const enriched = useMemo(() => myExpenses.map((expense, index) => {
-    const paidByUser = expense.paidBy?._id === user._id;
-    const involved = expense.splitAmong?.some(m => m._id === user._id);
+    const paidByUser = expense.paidBy?._id === user?._id;
+    const involved = expense.splitAmong?.some(m => m._id === user?._id);
     const shareAmount = involved ? (expense.amount / (expense.splitAmong?.length || 1)) : 0;
     const type = paidByUser ? "lent" : involved ? "owe" : "none";
     return { ...expense, paidByUser, involved, shareAmount, type, originalIndex: index };
-  }), [myExpenses, user._id]);
+  }), [myExpenses, user?._id]);
 
   const totalLent = enriched.reduce((sum, e) => {
     if (e.paidByUser && e.involved) return sum + (e.amount - e.shareAmount);
@@ -65,9 +65,9 @@ export default function Expenses() {
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(e =>
-        e.title.toLowerCase().includes(q) ||
-        e.group?.name?.toLowerCase().includes(q) ||
-        e.paidBy?.firstName?.toLowerCase().includes(q)
+        (e.title || "").toLowerCase().includes(q) ||
+        (e.group?.name || "").toLowerCase().includes(q) ||
+        (e.paidBy?.firstName || "").toLowerCase().includes(q)
       );
     }
 
@@ -181,12 +181,18 @@ export default function Expenses() {
                   <div>
                     <h3 className="font-medium text-gray-900">{expense.title}</h3>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Link
-                        to={`/groups/${expense.group?._id}`}
-                        className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full hover:bg-indigo-100 transition"
-                      >
-                        {expense.group?.name}
-                      </Link>
+                      {expense.group ? (
+                        <Link
+                          to={`/groups/${expense.group._id}`}
+                          className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full hover:bg-indigo-100 transition"
+                        >
+                          {expense.group.name}
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                          Deleted Group
+                        </span>
+                      )}
                       <span className="text-xs text-gray-400">
                         {new Date(expense.createdAt).toLocaleDateString()}
                       </span>

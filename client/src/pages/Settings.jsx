@@ -40,8 +40,22 @@ export default function Settings() {
     setProfileSuccess("");
     setProfileLoading(true);
     try {
-      const response = await api.put("/auth/profile", profileForm);
+      const sanitizedForm = {
+        firstName: profileForm.firstName.trim(),
+        lastName: profileForm.lastName.trim(),
+        email: profileForm.email.trim(),
+      };
+      if (!sanitizedForm.firstName || !sanitizedForm.lastName || !sanitizedForm.email) {
+        setProfileError("All fields are required");
+        return;
+      }
+      const response = await api.put("/auth/profile", sanitizedForm);
       updateUser(response.data.user);
+      setProfileForm({
+        firstName: response.data.user.firstName,
+        lastName: response.data.user.lastName,
+        email: response.data.user.email,
+      });
       setProfileSuccess("Profile updated successfully!");
     } catch (err) {
       setProfileError(err.response?.data?.message || "Something went wrong");
@@ -131,6 +145,7 @@ export default function Settings() {
                     onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
                     required
                     placeholder="Vidhi"
+                    autoComplete="given-name"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -152,6 +167,7 @@ export default function Settings() {
                     onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
                     required
                     placeholder="Patel"
+                    autoComplete="family-name"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -173,6 +189,7 @@ export default function Settings() {
                     onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                     required
                     placeholder="you@example.com"
+                    autoComplete="email"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -226,6 +243,7 @@ export default function Settings() {
                     required
                     minLength={6}
                     placeholder="Current password"
+                    autoComplete="current-password"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -248,6 +266,7 @@ export default function Settings() {
                     required
                     minLength={6}
                     placeholder="At least 6 characters"
+                    autoComplete="new-password"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -270,6 +289,7 @@ export default function Settings() {
                     required
                     minLength={6}
                     placeholder="Re-enter new password"
+                    autoComplete="new-password"
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>

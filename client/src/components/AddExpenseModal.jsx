@@ -17,14 +17,31 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
+    const trimmedTitle = expenseForm.title.trim();
     if (expenseForm.splitAmong.length === 0) {
       setExpenseError("Please select at least one member to split the expense with.");
+      return;
+    }
+    if (!trimmedTitle) {
+      setExpenseError("Please enter title of expense.");
+      return;
+    }
+    if (!expenseForm.amount || Number(expenseForm.amount) <= 0) {
+      setExpenseError("Please enter a valid amount greater than 0.");
+      return;
+    }
+    if (!expenseForm.paidBy) {
+      setExpenseError("Please select who paid the expense.");
       return;
     }
     setExpenseError("");
     setExpenseLoading(true);
     try {
-      await api.post(`/groups/${id}/expenses`, expenseForm);
+      await api.post(`/groups/${id}/expenses`, {
+        ...expenseForm,
+        title: trimmedTitle,
+        amount: parseFloat(expenseForm.amount),
+      });
       setShowExpenseModal(false);
       setExpenseForm({
         title: "",
@@ -36,7 +53,6 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
       fetchGroupAndExpenses();
     } catch (err) {
       setExpenseError(err.response?.data?.message || "Something went wrong");
-      // toast.error(err.response?.data?.message || "Something went wrong");
     } finally {
       setExpenseLoading(false);
     }
@@ -182,14 +198,14 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                     });
                     setExpenseError("");
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={expenseLoading}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium transition"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium transition cursor-pointer"
                 >
                   {expenseLoading ? "Adding..." : "Add Expense"}
                 </button>

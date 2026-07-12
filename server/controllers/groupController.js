@@ -27,7 +27,6 @@ exports.getMyGroups = async (req, res) => {
     const groups = await Group.find({ members: req.user._id })
       .populate("members", "firstName lastName email")
       .populate("createdBy", "firstName lastName email");
-
     const groupsWithBalances = [];
 
     for (let group of groups) {
@@ -71,6 +70,10 @@ exports.getGroupById = async (req, res) => {
     const group = await Group.findById(groupId)
       .populate("members", "firstName lastName email")
       .populate("createdBy", "firstName lastName email");
+    const isMember = group.members.map(m => m._id.toString()).includes(req.user._id.toString());
+    if (!isMember) {
+      return res.status(403).json({ message: "You are not a member of this group" });
+    }
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }

@@ -9,7 +9,7 @@ export default function useGroups() {
   const fetchGroups = async () => {
     try {
       const response = await api.get("/groups");
-      setGroups(response.data.groups);
+      setGroups(response.data.groups || []);
       setError("");
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";

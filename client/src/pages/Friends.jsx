@@ -27,12 +27,12 @@ export default function Friends() {
           api.get("/friends/requests"),
           api.get("/friends/requests/sent")
         ]);
-        setBalances(balancesRes.data.balances);
-        setRequests(requestsRes.data);
-        setSentRequests(sentRes.data);
+        setBalances(balancesRes.data.balances || []);
+        setRequests(requestsRes.data || []);
+        setSentRequests(sentRes.data || []);
       } catch (err) {
         console.log(err);
-        setError(err || "Something went wrong!");
+        setError(err.response?.data?.message || "Something went wrong. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -45,8 +45,8 @@ export default function Friends() {
     setFormError("");
     try {
       await api.post("/friends/request", {
-        receiverEmail: form.email,
-        message: form.message
+        receiverEmail: form.email.trim(),
+        message: form.message.trim()
       });
       setRequestSent(true);
       setForm({ email: "", message: "" });
@@ -61,7 +61,7 @@ export default function Friends() {
       setRequests(prev => prev.filter(r => r._id !== requestId));
       if (status === "accepted") {
         const res = await api.get("/friends/balances");
-        setBalances(res.data.balances);
+        setBalances(res.data.balances || []);
       }
     } catch (err) {
       console.log(err);
@@ -100,6 +100,12 @@ export default function Friends() {
           </button>
         </div>
 
+        {error && (
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+            <HiOutlineExclamationTriangle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
         {/* balances */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
@@ -132,7 +138,7 @@ export default function Friends() {
             <div className="flex gap-4 border-b border-gray-200 mb-4">
               <button
                 onClick={() => setRequestTab("received")}
-                className={`pb-2.5 text-sm font-medium border-b-2 transition ${requestTab === "received"
+                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${requestTab === "received"
                   ? "border-indigo-600 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
@@ -145,7 +151,7 @@ export default function Friends() {
               </button>
               <button
                 onClick={() => setRequestTab("sent")}
-                className={`pb-2.5 text-sm font-medium border-b-2 transition ${requestTab === "sent"
+                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${requestTab === "sent"
                   ? "border-indigo-600 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}

@@ -4,13 +4,18 @@ const generateToken = require("../utils/generateToken");
 exports.register = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
+    if (!firstName || !lastName || !email || typeof email !== "string" || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+
     // User Exist or not
-    const userExist = await User.findOne({ email });
+    const userExist = await User.findOne({ email: normalizedEmail });
     if (userExist) {
       return res.status(400).json({ message: "User already exists" });
     };
-    // Not exist creat e new user
-    const user = await User.create({ firstName, lastName, email, password });
+    // Not exist create new user
+    const user = await User.create({ firstName, lastName, email: normalizedEmail, password });
     const token = generateToken(user._id);
     return res.status(201).json({ message: "User Created", _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, token });
   } catch (err) {
@@ -21,9 +26,12 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const email = req.body.email;
-    const password = req.body.password;
-    const user = await User.findOne({ email }).select("+password");
+    const { email, password } = req.body;
+    if (!email || typeof email !== "string" || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -42,7 +50,6 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     return res.status(200).json(req.user);
-
   } catch (err) {
     console.log("Error in getMe", err);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -57,9 +64,9 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     if (user) {
-      user.firstName = firstName || user.firstName;
-      user.lastName = lastName || user.lastName;
-      user.email = email || user.email;
+      user.firstName = firstName ? firstName.trim() : user.firstName;
+      user.lastName = lastName ? lastName.trim() : user.lastName;
+      user.email = email ? email.trim().toLowerCase() : user.email;
       await user.save();
     }
     return res.status(200).json({
