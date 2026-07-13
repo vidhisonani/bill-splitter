@@ -6,8 +6,11 @@ import { Link } from 'react-router-dom';
 import { HiOutlineExclamationTriangle, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 import LoadingScreen from "../components/LoadingScreen";
 import { avatarColors } from "../utils/avatar";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 export default function Expenses() {
+  useDocumentTitle("Expenses | SplitEase");
+
   const [myExpenses, setMyExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

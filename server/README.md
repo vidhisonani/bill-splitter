@@ -45,6 +45,7 @@ Express + MongoDB REST API for the SplitEase bill splitting app.
 |--------|----------|-------------|------|
 | POST | /api/groups/:id/expenses | Add expense | Yes |
 | GET | /api/groups/:id/expenses | Get group expenses | Yes |
+| GET | /api/groups/:id/expenses | Get all expenses for a group | Yes |
 | DELETE | /api/expenses/:id | Delete expense | Yes |
 
 ### Settlements

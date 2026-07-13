@@ -30,11 +30,15 @@ React + Vite frontend for the SplitEase bill splitting app.
 
 | Route | Page | Protected |
 |-------|------|-----------|
+| / | Home | No |
 | /login | Login | No |
 | /register | Register | No |
 | /dashboard | Dashboard | Yes |
 | /groups/:id | Group Detail | Yes |
 | /groups | All Groups | Yes |
+| /freinds | Freinds | Yes |
+| /expense | Expense | Yes |
+| /settings | Settings | Yes |
 
 ## Folder Structure
 ```
@@ -43,8 +47,11 @@ client/src/
 ├── components/     # ProtectedRoute, reusable UI
 ├── context/        # AuthContext (JWT + localStorage)
 ├── pages/          # One file per route
+├── hooks/          # Custom hooks
+├── utils/          # Utility functions
 └── App.jsx         # Router setup
 ```
+
 ## Key Concepts Used
 - JWT auth with localStorage persistence
 - Axios interceptor auto-attaches token to every request

@@ -8,8 +8,11 @@ import useGroups from '../hooks/useGroups';
 import LoadingScreen from '../components/LoadingScreen';
 import CreateGroupCard from '../components/CreateGroupCard';
 import GroupDetailsCards from '../components/GroupsDetailsCards';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function Dashboard() {
+  useDocumentTitle("Dashboard | SplitEase");
+
   const { groups, setGroups, loading, error } = useGroups();
   const [showModal, setShowModal] = useState(false);
   const { user } = useAuth();

@@ -6,8 +6,11 @@ import CreateGroupModal from '../components/CreateGroupModal';
 import CreateGroupCard from "../components/CreateGroupCard";
 import useGroups from '../hooks/useGroups';
 import GroupDetailsCards from '../components/GroupsDetailsCards';
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 export default function Groups() {
+  useDocumentTitle("Groups | SplitEase");
+
   const { groups, setGroups, loading, error } = useGroups();
   const [showModal, setShowModal] = useState(false);
 

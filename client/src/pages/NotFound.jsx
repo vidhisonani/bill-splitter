@@ -1,8 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { MdReceiptLong } from 'react-icons/md';
 import { HiOutlineArrowLeft, HiOutlineHome } from 'react-icons/hi2';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function NotFound() {
+  useDocumentTitle("404 Page Not Found | SplitEase");
+
   const navigate = useNavigate();
 
   return (

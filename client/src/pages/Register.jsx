@@ -3,8 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MdEmail, MdLock, MdPerson, MdPersonAdd, MdReceiptLong, MdError } from 'react-icons/md';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function Register() {
+  useDocumentTitle("Register | SplitEase");
+
   const { login, user } = useAuth();
   const navigate = useNavigate();
 

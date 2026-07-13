@@ -6,8 +6,11 @@ import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus, HiOutline
 import { MdError } from 'react-icons/md';
 import LoadingScreen from '../components/LoadingScreen';
 import toast from 'react-hot-toast';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Friends() {
+  useDocumentTitle("Friends | SplitEase");
+
   const { user } = useAuth();
   const [balances, setBalances] = useState([]);
   const [requests, setRequests] = useState([]);

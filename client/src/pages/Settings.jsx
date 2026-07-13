@@ -6,8 +6,11 @@ import Sidebar from '../components/Sidebar';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { getInitials } from '../utils/avatar';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 export default function Settings() {
+  useDocumentTitle("Settings | SplitEase");
+
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
 
