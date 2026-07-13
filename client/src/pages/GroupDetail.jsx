@@ -10,6 +10,7 @@ import MembersCard from '../components/MembersCard';
 import AddMemberCard from '../components/AddMemberCard';
 import { getInitials, avatarColors } from '../utils/avatar';
 import LoadingScreen from '../components/LoadingScreen';
+import ExpenseDetailCard from '../components/ExpenseDetailCard';
 
 export default function GroupDetail() {
   const { id } = useParams();
@@ -20,15 +21,19 @@ export default function GroupDetail() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("expenses");
   const [expenses, setExpenses] = useState([]);
+  const [showExpenseCard, setShowExpenseCard] = useState(false);
+  const [expenseId, setExpenseId] = useState(false);
 
   const fetchGroupAndExpenses = async () => {
+    setLoading(true);
     try {
-      const groupRes = await api.get(`/groups/${id}`);
+      const [groupRes, expensesRes] = await Promise.all([
+        api.get(`/groups/${id}`),
+        api.get(`/groups/${id}/expenses`)
+      ]);
       setGroup(groupRes.data.group);
-      const expensesRes = await api.get(`/groups/${id}/expenses`);
       setExpenses(expensesRes.data.expenses);
     } catch (err) {
-      console.log(err);
       setError(err.response?.data?.message || "Failed to fetch group data");
       if (err.response?.status === 404 || err.response?.status === 403) {
         navigate('/dashboard');
@@ -211,7 +216,7 @@ export default function GroupDetail() {
             {/* Add member card */}
             <AddMemberCard id={group._id} fetchGroupAndExpenses={fetchGroupAndExpenses} />
             {/* Delete Group */}
-            <DeleteGroupModal id={group._id} group={group} />
+            <DeleteGroupModal groupId={group._id} group={group} />
           </div>
 
           {/* Right column: tabs */}
@@ -255,7 +260,10 @@ export default function GroupDetail() {
                         const shareAmount = involved ? (expense.amount / (expense.splitAmong?.length || 1)) : 0;
 
                         return (
-                          <div key={expense._id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition">
+                          <div key={expense._id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition cursor-pointer"
+                            onClick={() => { setShowExpenseCard(true), setExpenseId(expense._id) }}
+                          >
+
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
                                 {expense.title ? expense.title[0].toUpperCase() : "E"}
@@ -290,6 +298,7 @@ export default function GroupDetail() {
                           </div>
                         );
                       })}
+                      {showExpenseCard && <ExpenseDetailCard expenseId={expenseId} onClose={() => setShowExpenseCard(false)} refreshExpenses={fetchGroupAndExpenses} />}
                     </div>
                   )
                 )}

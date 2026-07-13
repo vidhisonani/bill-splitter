@@ -8,16 +8,35 @@ export default function CreateGroupModal({ show, onClose, onGroupCreated }) {
   const [groupError, setGroupError] = useState("");
   const [creating, setCreating] = useState(false);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setGroupForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const resetForm = () => {
     setGroupForm({ name: "", description: "" });
     setGroupError("");
   };
+
   const handleCreateGroup = async (e) => {
     e.preventDefault();
-    setCreating(true);
     setGroupError("");
+    if (!groupForm.name.trim()) {
+      setGroupError("Group name is required");
+      return;
+    }
+    setCreating(true);
+    const payload = {
+      ...groupForm,
+      name: groupForm.name.trim(),
+      description: groupForm.description.trim() || ""
+    };
+
     try {
-      const response = await api.post("/groups", groupForm);
+      const response = await api.post("/groups", payload);
       onGroupCreated(response.data.group);
       resetForm();
       onClose();
@@ -48,11 +67,13 @@ export default function CreateGroupModal({ show, onClose, onGroupCreated }) {
                 Group name <span className="text-red-500">*</span>
               </label>
               <input
+                name="name"
                 type="text"
                 required
+                autoFocus
                 disabled={creating}
                 value={groupForm.name}
-                onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
+                onChange={handleChange}
                 placeholder="e.g. Goa Trip, Flat 4B"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
               />
@@ -61,11 +82,12 @@ export default function CreateGroupModal({ show, onClose, onGroupCreated }) {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Description <span className="text-gray-400 font-normal">(optional)</span>
               </label>
-              <input
-                type="text"
+              <textarea
+                name="description"
+                rows={3}
                 disabled={creating}
                 value={groupForm.description}
-                onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
+                onChange={handleChange}
                 placeholder="e.g. March trip expenses"
                 className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
               />

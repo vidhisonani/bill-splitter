@@ -24,6 +24,7 @@ exports.addExpense = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
+
 exports.getGroupExpenses = async (req, res) => {
   try {
     const groupId = req.params.id;
@@ -42,6 +43,7 @@ exports.getGroupExpenses = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
+
 exports.deleteExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
@@ -59,21 +61,36 @@ exports.deleteExpense = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
+
 exports.getMyExpenses = async (req, res) => {
-  try{
+  try {
     const expenses = await Expense.find({
-      $or: [{paidBy : req.user._id}, {splitAmong: req.user._id}]
+      $or: [{ paidBy: req.user._id }, { splitAmong: req.user._id }]
     })
-    .populate("paidBy", "firstName lastName email")
-    .populate("splitAmong", "firstName lastName email")
-    .populate("group", "name")
-    .sort({createdAt: -1});
-    return res.status(200).json({message: "Expenses fetched successfully", expenses});
-  }catch(err){
+      .populate("paidBy", "firstName lastName email")
+      .populate("splitAmong", "firstName lastName email")
+      .populate("group", "name")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({ message: "Expenses fetched successfully", expenses });
+  } catch (err) {
     console.log("Error while fetching my expense", err);
-    return res.status(500).json({message: "Internal Server Error"});
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 }
-// exports.updateExpense = async (req, res) => {
 
-// }
+exports.getExpenseById = async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id)
+      .populate("createdBy", "firstName lastName")
+      .populate("paidBy", "firstName lastName email")
+      .populate("splitAmong", "firstName lastName email");
+
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+    return res.status(200).json({ expense });
+  } catch (err) {
+    console.log("Error while fetching expense by id", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from 'react-router-dom';
 import { HiOutlineExclamationTriangle, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 import LoadingScreen from "../components/LoadingScreen";
+import { avatarColors } from "../utils/avatar";
 
 export default function Expenses() {
   const [myExpenses, setMyExpenses] = useState([]);
@@ -30,11 +31,6 @@ export default function Expenses() {
     }
     fetchExpenses();
   }, []);
-
-  const avatarColors = [
-    "bg-indigo-500", "bg-pink-500", "bg-emerald-500",
-    "bg-amber-500", "bg-sky-500", "bg-violet-500"
-  ];
 
   const enriched = useMemo(() => myExpenses.map((expense, index) => {
     const paidByUser = expense.paidBy?._id === user?._id;

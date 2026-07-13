@@ -12,9 +12,14 @@ export default function AddMemberCard({ id, fetchGroupAndExpenses }) {
   const handleAddMember = async (e) => {
     e.preventDefault();
     setMemberError("");
+    const email = memberEmail.trim();
+    if (!email) {
+      setMemberError("Please enter email address.");
+      return;
+    }
     setMemberLoading(true);
     try {
-      await api.post(`/groups/${id}/members`, { email: memberEmail });
+      await api.post(`/groups/${id}/members`, { email });
       toast.success("Member added successfully");
       setMemberEmail("");
       await fetchGroupAndExpenses();
@@ -41,9 +46,13 @@ export default function AddMemberCard({ id, fetchGroupAndExpenses }) {
           <input
             type="email"
             value={memberEmail}
-            onChange={(e) => setMemberEmail(e.target.value)}
+            onChange={(e) => {
+              setMemberEmail(e.target.value);
+              if (memberError) setMemberError("");
+            }}
             placeholder="friend@example.com"
             required
+            disabled={memberLoading}
             className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
           />
           <button

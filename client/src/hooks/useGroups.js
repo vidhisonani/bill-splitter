@@ -7,6 +7,7 @@ export default function useGroups() {
   const [error, setError] = useState("");
 
   const fetchGroups = async () => {
+    setLoading(true);
     try {
       const response = await api.get("/groups");
       setGroups(response.data.groups || []);

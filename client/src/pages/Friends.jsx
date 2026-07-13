@@ -5,6 +5,7 @@ import api from '../api';
 import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus, HiOutlineCheck, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { MdError } from 'react-icons/md';
 import LoadingScreen from '../components/LoadingScreen';
+import toast from 'react-hot-toast';
 
 export default function Friends() {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function Friends() {
   const [requestSent, setRequestSent] = useState(false);
   const [form, setForm] = useState({ email: "", message: "" });
   const [formError, setFormError] = useState("");
+  const [formLoading, setFormLoading] = useState(false);
   const [sentRequests, setSentRequests] = useState([]);
   const [requestTab, setRequestTab] = useState("received"); // "received" Or "sent"
   const [error, setError] = useState("");
@@ -43,6 +45,7 @@ export default function Friends() {
   const handleSendRequest = async (e) => {
     e.preventDefault();
     setFormError("");
+    setFormLoading(true);
     try {
       await api.post("/friends/request", {
         receiverEmail: form.email.trim(),
@@ -52,6 +55,8 @@ export default function Friends() {
       setForm({ email: "", message: "" });
     } catch (err) {
       setFormError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -62,9 +67,10 @@ export default function Friends() {
       if (status === "accepted") {
         const res = await api.get("/friends/balances");
         setBalances(res.data.balances || []);
+        toast.success("Request accepted successfully.");
       }
     } catch (err) {
-      console.log(err);
+      toast.error("Failed to update request.");
     }
   };
 
@@ -72,8 +78,9 @@ export default function Friends() {
     try {
       await api.delete(`/friends/requests/${requestId}`);
       setSentRequests(prev => prev.filter(r => r._id !== requestId));
+      toast.success("Request cancelled successfully.");
     } catch (err) {
-      console.log(err);
+      toast.error("Failed to cancel request.");
     }
   };
 
@@ -334,8 +341,13 @@ export default function Friends() {
                   <input
                     type="email"
                     required
+                    autoFocus
+                    disabled={formLoading}
                     value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    onChange={(e) => {
+                      setForm({ ...form, email: e.target.value });
+                      if (formError) setFormError("");
+                    }}
                     placeholder="friend@example.com"
                     className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
@@ -346,6 +358,7 @@ export default function Friends() {
                   </label>
                   <input
                     type="text"
+                    disabled={formLoading}
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="e.g. March trip expenses"
@@ -355,19 +368,22 @@ export default function Friends() {
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
+                    disabled={formLoading}
                     onClick={() => {
                       setShowModal(false);
                       setForm({ email: "", message: "" });
+                      setFormError("");
                     }}
-                    className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition"
+                    disabled={formLoading}
+                    className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white text-sm font-medium transition cursor-pointer"
                   >
-                    Add Friend
+                    {formLoading ? "Sending..." : "Add Friend"}
                   </button>
                 </div>
               </form>

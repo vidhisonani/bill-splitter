@@ -27,6 +27,7 @@ function Login() {
       ...prevData,
       [name]: value,
     }));
+    if(error) setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -91,6 +92,7 @@ function Login() {
                   placeholder="you@example.com"
                   autoFocus
                   autoComplete="email"
+                  disabled={loading}
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
               </div>
@@ -114,6 +116,7 @@ function Login() {
                   minLength={6}
                   placeholder="At least 6 characters"
                   autoComplete="current-password"
+                  disabled={loading}
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
               </div>

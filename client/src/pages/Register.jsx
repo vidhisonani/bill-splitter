@@ -31,6 +31,7 @@ function Register() {
       ...prevData,
       [name]: value,
     }));
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -41,13 +42,21 @@ function Register() {
       setError("Passwords do not match");
       return;
     }
-
+    const { firstName, lastName, email, password, confirmPassword } = formData;
+    formData.firstName = firstName.trim();
+    formData.lastName = lastName.trim();
+    formData.email = email.trim();
+    formData.password = password.trim();
+    formData.confirmPassword = confirmPassword.trim();
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      setError("Please fill all the fields");
+      return;
+    }
     setLoading(true);
     try {
       const { confirmPassword, ...dataToSend } = formData;
       const response = await api.post("/auth/register", dataToSend);
       login(response.data);
-      navigate("/dashboard");
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";
       setError(message);
@@ -77,7 +86,16 @@ function Register() {
               Start splitting bills with friends in minutes.
             </p>
           </div>
-
+          {error && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600 mb-5"
+            >
+              <MdError size={18} className="shrink-0" />
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -96,6 +114,7 @@ function Register() {
                     onChange={handleChange}
                     required
                     placeholder="Vidhi"
+                    disabled={loading}
                     className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -116,6 +135,7 @@ function Register() {
                     onChange={handleChange}
                     required
                     placeholder="Patel"
+                    disabled={loading}
                     className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
                 </div>
@@ -138,6 +158,7 @@ function Register() {
                   onChange={handleChange}
                   required
                   placeholder="you@example.com"
+                  disabled={loading}
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
               </div>
@@ -159,6 +180,7 @@ function Register() {
                   onChange={handleChange}
                   required
                   minLength={6}
+                  disabled={loading}
                   placeholder="At least 6 characters"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />
@@ -181,6 +203,7 @@ function Register() {
                   onChange={handleChange}
                   required
                   minLength={6}
+                  disabled={loading}
                   placeholder="Re-enter your password"
                   className="w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 />

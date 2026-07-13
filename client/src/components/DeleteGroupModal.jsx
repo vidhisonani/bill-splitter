@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { HiOutlineTrash } from 'react-icons/hi2';
 import toast from "react-hot-toast";
 
-export default function DeleteGroupModal({ id, group }) {
+export default function DeleteGroupModal({ groupId, group }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ export default function DeleteGroupModal({ id, group }) {
   const handleDeleteGroup = async () => {
     setLoading(true);
     try {
-      await api.delete(`/groups/${id}`);
+      await api.delete(`/groups/${groupId}`);
       toast.success("Group deleted");
       navigate("/groups");
     } catch (err) {
@@ -27,7 +27,7 @@ export default function DeleteGroupModal({ id, group }) {
 
   return (
     <>
-      {group.createdBy._id === user._id && (
+      {group?.createdBy?._id === user?._id && (
         <div className='bg-white rounded-xl border border-gray-200 p-5'>
           <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <HiOutlineTrash className='w-5 h-5' /> Want to delete this group?
@@ -51,7 +51,7 @@ export default function DeleteGroupModal({ id, group }) {
             <p className="text-gray-600 mb-4">This action cannot be undone. All expenses, balances, and members will be permanently deleted.</p>
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 border rounded cursor-pointer" > Cancel </button>
-              <button onClick={handleDeleteGroup} className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition" > Delete </button>
+              <button onClick={handleDeleteGroup} disabled={loading} className="px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700 transition" > {loading ? "Deleting..." : "Delete"} </button>
             </div>
           </div>
         </div>

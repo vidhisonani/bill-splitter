@@ -1,9 +1,8 @@
 import { getInitials, avatarColors } from "../utils/avatar"
 
-export default function MembersCard({ members = group.members }) {
+export default function MembersCard({ members = [] }) {
   // members detail on GroupDetail page
   return (
-    <>
       <div className="bg-white rounded-xl border border-gray-200 p-5">
         <h2 className="text-sm font-semibold text-gray-900 mb-4">
           Members ({members.length})
@@ -24,6 +23,5 @@ export default function MembersCard({ members = group.members }) {
           ))}
         </div>
       </div>
-    </>
   )
 }

@@ -11,6 +11,7 @@ groupExpenseRouter.post("/", protect, expenseController.addExpense);
 groupExpenseRouter.get("/", protect, expenseController.getGroupExpenses);
 
 // /api/expenses/:id
+expenseRouter.get("/:id", protect, expenseController.getExpenseById);
 expenseRouter.delete("/:id", protect, expenseController.deleteExpense);
 
 module.exports = { groupExpenseRouter, expenseRouter };

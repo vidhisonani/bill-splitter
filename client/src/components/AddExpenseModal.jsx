@@ -8,12 +8,24 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [expenseError, setExpenseError] = useState("");
   const [expenseLoading, setExpenseLoading] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({
+
+  const getInitialExpenseForm = () => ({
     title: "",
     amount: "",
-    paidBy: "",
-    splitAmong: []
+    paidBy: user._id,
+    splitAmong: group?.members.map(m => m._id) || [],
   });
+
+  const [expenseForm, setExpenseForm] = useState(getInitialExpenseForm);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setExpenseForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (expenseError) setExpenseError("");
+  }
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
@@ -43,12 +55,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
         amount: parseFloat(expenseForm.amount),
       });
       setShowExpenseModal(false);
-      setExpenseForm({
-        title: "",
-        amount: "",
-        paidBy: user._id,
-        splitAmong: group?.members.map(m => m._id) || []
-      });
+      setExpenseForm(getInitialExpenseForm());
       toast.success("Expense added successfully");
       fetchGroupAndExpenses();
     } catch (err) {
@@ -62,12 +69,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
     <>
       <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer"
         onClick={() => {
-          setExpenseForm({
-            title: "",
-            amount: "",
-            paidBy: user._id,
-            splitAmong: group?.members.map(m => m._id) || []
-          });
+          setExpenseForm(getInitialExpenseForm());
           setExpenseError("");
           setShowExpenseModal(true);
         }}
@@ -97,9 +99,11 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                 </label>
                 <input
                   type="text"
+                  name="title"
                   required
+                  autoFocus
                   value={expenseForm.title}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })}
+                  onChange={handleChange}
                   placeholder="e.g. Goa Dinner, Grocery, Fuel"
                   className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
                 />
@@ -111,11 +115,12 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                 </label>
                 <input
                   type="number"
+                  name="amount"
                   required
                   min="0.01"
                   step="0.01"
                   value={expenseForm.amount}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+                  onChange={handleChange}
                   placeholder="0.00"
                   className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm"
                 />
@@ -127,7 +132,8 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                 </label>
                 <select
                   value={expenseForm.paidBy}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, paidBy: e.target.value })}
+                  name="paidBy"
+                  onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm cursor-pointer"
                 >
                   {group.members.map(m => (
@@ -146,7 +152,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setExpenseForm({ ...expenseForm, splitAmong: group.members.map(m => m._id) })}
+                      onClick={() => setExpenseForm(prev => ({ ...prev, splitAmong: group.members.map(m => m._id) }))}
                       className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
                       Select All
@@ -154,7 +160,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                     <span className="text-gray-300 text-xs">|</span>
                     <button
                       type="button"
-                      onClick={() => setExpenseForm({ ...expenseForm, splitAmong: [] })}
+                      onClick={() => setExpenseForm(prev => ({ ...prev, splitAmong: [] }))}
                       className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
                       Select None
@@ -174,7 +180,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                             const updated = e.target.checked
                               ? [...expenseForm.splitAmong, m._id]
                               : expenseForm.splitAmong.filter(id => id !== m._id);
-                            setExpenseForm({ ...expenseForm, splitAmong: updated });
+                            setExpenseForm(prev => ({ ...prev, splitAmong: updated }));
                           }}
                           className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
@@ -190,12 +196,7 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                   type="button"
                   onClick={() => {
                     setShowExpenseModal(false);
-                    setExpenseForm({
-                      title: "",
-                      amount: "",
-                      paidBy: user._id,
-                      splitAmong: group?.members.map(m => m._id) || []
-                    });
+                    setExpenseForm(getInitialExpenseForm());
                     setExpenseError("");
                   }}
                   className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition cursor-pointer"

@@ -9,6 +9,7 @@ import Expenses from "./pages/Expenses";
 import Home from "./pages/Home";
 import Settings from "./pages/Settings";
 import Friends from "./pages/Friends";
+import NotFound from "./pages/NotFound";
 
 function App() {
 
@@ -52,6 +53,7 @@ function App() {
             <Friends />
           </ProtectedRoute>
         }/>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
