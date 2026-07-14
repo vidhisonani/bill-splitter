@@ -42,8 +42,11 @@ export default function CreateGroupModal({ show, onClose, onGroupCreated }) {
       onClose();
       toast.success("Group created successfully");
     } catch (err) {
-      const message = err?.response?.data?.message || "Something went wrong";
-      setGroupError(message);
+      if (err.response?.data?.errors) {
+        setGroupError(err.response.data.errors[0].msg);
+      } else {
+        setGroupError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setCreating(false);
     }

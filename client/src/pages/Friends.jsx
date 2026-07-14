@@ -36,8 +36,11 @@ export default function Friends() {
         setRequests(requestsRes.data || []);
         setSentRequests(sentRes.data || []);
       } catch (err) {
-        console.log(err);
-        setError(err.response?.data?.message || "Something went wrong. Please try again.");
+        if (err.response?.data?.errors) {
+          setError(err.response?.data?.errors[0]?.msg);
+        } else {
+          setError(err.response?.data?.message || "Something went wrong");
+        }
       } finally {
         setLoading(false);
       }

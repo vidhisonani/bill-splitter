@@ -59,7 +59,11 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
       toast.success("Expense added successfully");
       fetchGroupAndExpenses();
     } catch (err) {
-      setExpenseError(err.response?.data?.message || "Something went wrong");
+      if (err.response?.data?.errors) {
+        setExpenseError(err.response.data.errors[0].msg);
+      } else {
+        setExpenseError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setExpenseLoading(false);
     }

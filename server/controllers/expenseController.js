@@ -1,36 +1,69 @@
+const mongoose = require("mongoose");
 const Expense = require("../models/Expense");
 const Group = require("../models/Group");
+const { check, validationResult } = require("express-validator");
 
-
-exports.addExpense = async (req, res) => {
-  try {
-    const { title, amount, paidBy, splitAmong } = req.body;
-    const groupId = req.params.id;
-    const group = await Group.findById(groupId);
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
+exports.addExpense = [
+  check("title")
+    .notEmpty()
+    .withMessage("Title is required")
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Title must be at least 3 characters long"),
+  check("amount")
+    .notEmpty()
+    .withMessage("Amount is required")
+    .isFloat({ gt: 0 })
+    .withMessage("Amount must be greater than 0"),
+  check("paidBy")
+    .notEmpty()
+    .withMessage("Paid by is required"),
+  check("splitAmong")
+    .isArray({ min: 1 })
+    .withMessage("Split among must be an array with atleast 1 member"),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    const expense = await Expense.create({
-      group: groupId,
-      title,
-      amount,
-      paidBy,
-      splitAmong,
-      createdBy: req.user._id
-    });
-    return res.status(201).json({ message: "Expense added successfully", expense });
-  } catch (err) {
-    console.log("Error while adding expense", err);
-    return res.status(500).json({ message: "Internal Server Error" })
-  }
-}
+    try {
+      const { title, amount, paidBy, splitAmong } = req.body;
+      const groupId = req.params.id;
+      const group = await Group.findById(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      const isMember = group.members.some(member => member.toString() === req.user._id.toString());
+      if (!isMember) {
+        return res.status(403).json({ message: "You are not a member of this group" });
+      }
+      const expense = await Expense.create({
+        group: groupId,
+        title,
+        amount,
+        paidBy,
+        splitAmong,
+        createdBy: req.user._id
+      });
+      return res.status(201).json({ message: "Expense added successfully", expense });
+    } catch (err) {
+      return res.status(500).json({ message: "Internal Server Error" })
+    }
+  }]
 
 exports.getGroupExpenses = async (req, res) => {
   try {
     const groupId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group id" });
+    }
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
+    }
+    const isMember = group.members.some(member => member.toString() === req.user._id.toString());
+    if (!isMember) {
+      return res.status(403).json({ message: "You are not a member of this group" });
     }
     const expenses = await Expense.find({ group: groupId })
       .populate("paidBy", "firstName lastName email")
@@ -39,7 +72,6 @@ exports.getGroupExpenses = async (req, res) => {
       .sort({ createdAt: -1 });;
     return res.status(200).json({ message: "Expenses fetched successfully", expenses });
   } catch (err) {
-    console.log("Error while fetching expense", err);
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
@@ -47,6 +79,9 @@ exports.getGroupExpenses = async (req, res) => {
 exports.deleteExpense = async (req, res) => {
   try {
     const expenseId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+      return res.status(400).json({ message: "Invalid expense id" });
+    }
     const expense = await Expense.findById(expenseId);
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" })
@@ -57,7 +92,6 @@ exports.deleteExpense = async (req, res) => {
     await expense.deleteOne();
     return res.status(200).json({ message: "Expense deleted successfully", expense })
   } catch (err) {
-    console.log("Error while deleting expense", err);
     return res.status(500).json({ message: "Internal Server Error" })
   }
 }
@@ -80,17 +114,18 @@ exports.getMyExpenses = async (req, res) => {
 
 exports.getExpenseById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid expense id" });
+    }
     const expense = await Expense.findById(req.params.id)
       .populate("createdBy", "firstName lastName")
       .populate("paidBy", "firstName lastName email")
       .populate("splitAmong", "firstName lastName email");
-
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
     return res.status(200).json({ expense });
   } catch (err) {
-    console.log("Error while fetching expense by id", err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }

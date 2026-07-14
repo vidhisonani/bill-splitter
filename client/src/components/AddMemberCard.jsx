@@ -24,7 +24,11 @@ export default function AddMemberCard({ id, fetchGroupAndExpenses }) {
       setMemberEmail("");
       await fetchGroupAndExpenses();
     } catch (err) {
-      setMemberError(err?.response?.data?.message || "Failed to add member");
+      if (err.response?.data?.errors) {
+        setMemberError(err.response.data.errors[0].msg);
+      } else {
+        setMemberError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setMemberLoading(false);
     }

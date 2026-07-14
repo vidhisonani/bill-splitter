@@ -19,7 +19,11 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses 
       const res = await api.get(`/expenses/${expenseId}`);
       setExpense(res.data.expense);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch expense data");
+      if (err.response?.data?.errors) {
+        setError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setError(err.response?.data?.message || "Failed to fetch expense data");
+      }
     } finally {
       setLoading(false);
     }

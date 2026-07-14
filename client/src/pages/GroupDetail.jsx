@@ -35,9 +35,13 @@ export default function GroupDetail() {
       setGroup(groupRes.data.group);
       setExpenses(expensesRes.data.expenses);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch group data");
       if (err.response?.status === 404 || err.response?.status === 403) {
         navigate('/dashboard');
+      }
+      if (err.response?.data?.errors) {
+        setError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setError(err.response?.data?.message || "Failed to fetch group data");
       }
     } finally {
       setLoading(false);

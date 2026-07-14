@@ -18,9 +18,9 @@ const demos = {
       { title: 'Beach dinner', paidBy: 'Neha', amount: '₹6,400', note: 'You owe ₹1,600' },
     ],
     balances: [
-      { from: 'Rahul', to: 'You', amount: '₹4,000' },
-      { from: 'Neha', to: 'You', amount: '₹6,000' },
-      { from: 'Priya', to: 'You', amount: '₹8,000' },
+      { from: 'Rahul', to: 'You', amount: '₹1,600' },
+      { from: 'Neha', to: 'You', amount: '₹3,200' },
+      { from: 'Priya', to: 'You', amount: '₹9,600' },
     ],
   },
   flat: {
@@ -126,7 +126,7 @@ export default function Home() {
                 <button
                   key={key}
                   onClick={() => { setActiveTab(key); setDemoTab('expenses'); }}
-                  className={`whitespace-nowrap md:w-full text-left px-3 py-2 rounded-lg text-sm transition ${activeTab === key
+                  className={`whitespace-nowrap md:w-full text-left px-3 py-2 rounded-lg text-sm transition cursor-pointer ${activeTab === key
                     ? 'bg-indigo-50 text-indigo-700 font-medium'
                     : 'text-slate-600 hover:bg-slate-50'
                     }`}
@@ -169,7 +169,7 @@ export default function Home() {
                   {demo.members.map((name, i) => {
                     const colors = ['bg-indigo-500', 'bg-pink-500', 'bg-emerald-500', 'bg-amber-500'];
                     return (
-                      <div key={i} className="flex items-center gap-2.5 sm:mb-3 lg:mb-0">
+                      <div key={i} className="flex items-center gap-2.5 sm:mb-3 lg:mb-3">
                         <div className={`w-8 h-8 rounded-full ${colors[i % colors.length]} flex items-center justify-center text-white text-xs font-medium shrink-0`}>
                           {name.slice(0, 2).toUpperCase()}
                         </div>
@@ -187,7 +187,7 @@ export default function Home() {
                 <div className="flex border-b border-gray-200 px-4">
                   <button
                     onClick={() => setDemoTab('expenses')}
-                    className={`py-3 px-4 text-sm font-medium border-b-2 transition ${demoTab === 'expenses'
+                    className={`py-3 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${demoTab === 'expenses'
                       ? 'border-indigo-600 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                       }`}
@@ -196,7 +196,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => setDemoTab('balances')}
-                    className={`py-3 px-4 text-sm font-medium border-b-2 transition ${demoTab === 'balances'
+                    className={`py-3 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${demoTab === 'balances'
                       ? 'border-indigo-600 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                       }`}
@@ -252,7 +252,7 @@ export default function Home() {
                             <div className="text-left sm:text-right pl-10 sm:pl-0">
                               {b.balance !== 0 && (
                                 <p
-                                  className={`text-sm font-semibold ${b.to === "You" ? "text-green-500" : "text-red-500"
+                                  className={`text-sm font-semibold ${b.to === "You" ? "text-red-500" : "text-green-500"
                                     }`}
                                 >
                                   {b.to === "You"

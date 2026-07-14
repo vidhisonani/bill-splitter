@@ -30,19 +30,33 @@ function Login() {
       ...prevData,
       [name]: value,
     }));
-    if(error) setError("");
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const dataToSend = {
+      email: formData.email.trim(),
+      password: formData.password.trim(),
+    };
+
+    if (!dataToSend.email || !dataToSend.password) {
+      setError("Please fill all the fields.");
+      return;
+    }
     setLoading(true);
+
     try {
-      const response = await api.post("/auth/login", formData);
+      const response = await api.post("/auth/login", dataToSend);
       login(response.data);
     } catch (err) {
-      const message = err.response?.data?.message || "Something went wrong";
-      setError(message);
+      if (err.response?.data?.errors) {
+        setError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -70,7 +84,9 @@ function Login() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
+            <div role="alert"
+              aria-live="polite"
+              className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-600">
               <MdError size={18} className="shrink-0" />
               {error}
             </div>

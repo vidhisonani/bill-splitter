@@ -5,7 +5,7 @@ const FriendRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
-  }, 
+  },
   receiver: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -19,10 +19,10 @@ const FriendRequestSchema = new mongoose.Schema({
   message: {
     type: String,
     trim: true,
+    maxlength: [200, "Message cannot exceed 200 characters"],
     default: ""
   },
 
-}, {timestamps: true})
-
+}, { timestamps: true })
 
 module.exports = mongoose.model("FriendRequest", FriendRequestSchema);

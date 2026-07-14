@@ -41,17 +41,21 @@ export default function Settings() {
     e.preventDefault();
     setProfileError("");
     setProfileSuccess("");
+
+    const sanitizedForm = {
+      firstName: profileForm.firstName.trim(),
+      lastName: profileForm.lastName.trim(),
+      email: profileForm.email.trim(),
+    };
+
+    if (!sanitizedForm.firstName || !sanitizedForm.lastName || !sanitizedForm.email) {
+      setProfileError("Please fill all the fields.");
+      return;
+    }
+
     setProfileLoading(true);
+
     try {
-      const sanitizedForm = {
-        firstName: profileForm.firstName.trim(),
-        lastName: profileForm.lastName.trim(),
-        email: profileForm.email.trim(),
-      };
-      if (!sanitizedForm.firstName || !sanitizedForm.lastName || !sanitizedForm.email) {
-        setProfileError("All fields are required");
-        return;
-      }
       const response = await api.put("/auth/profile", sanitizedForm);
       updateUser(response.data.user);
       setProfileForm({
@@ -61,7 +65,11 @@ export default function Settings() {
       });
       setProfileSuccess("Profile updated successfully!");
     } catch (err) {
-      setProfileError(err.response?.data?.message || "Something went wrong");
+      if (err.response?.data?.errors) {
+        setProfileError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setProfileError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setProfileLoading(false);
     }
@@ -71,20 +79,32 @@ export default function Settings() {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+
+    const dataToSend = {
+      currentPassword: passwordForm.currentPassword.trim(),
+      newPassword: passwordForm.newPassword.trim(),
+    };
+
+    if (!dataToSend.currentPassword || !dataToSend.newPassword) {
+      setPasswordError("Please fill all the fields");
+      return;
+    }
+
+    if (dataToSend.newPassword !== passwordForm.confirmPassword.trim()) {
       setPasswordError("New passwords do not match");
       return;
     }
     setPasswordLoading(true);
     try {
-      await api.put("/auth/password", {
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      });
+      await api.put("/auth/password", dataToSend);
       setPasswordSuccess("Password changed successfully!");
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      setPasswordError(err.response?.data?.message || "Something went wrong");
+      if (err.response?.data?.errors) {
+        setPasswordError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setPasswordError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setPasswordLoading(false);
     }
@@ -145,7 +165,12 @@ export default function Settings() {
                     name="firstName"
                     id="firstName"
                     value={profileForm.firstName}
-                    onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                    onChange={(e) => {
+                      setProfileForm({ ...profileForm, firstName: e.target.value });
+                      if (profileError) setProfileError("");
+                      if (profileSuccess) setProfileSuccess("");
+                    }}
+                    disabled={profileLoading}
                     required
                     placeholder="Vidhi"
                     autoComplete="given-name"
@@ -167,7 +192,12 @@ export default function Settings() {
                     name="lastName"
                     id="lastName"
                     value={profileForm.lastName}
-                    onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                    onChange={(e) => {
+                      setProfileForm({ ...profileForm, lastName: e.target.value });
+                      if (profileError) setProfileError("");
+                      if (profileSuccess) setProfileSuccess("");
+                    }}
+                    disabled={profileLoading}
                     required
                     placeholder="Patel"
                     autoComplete="family-name"
@@ -189,7 +219,12 @@ export default function Settings() {
                     name="email"
                     id="email"
                     value={profileForm.email}
-                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    onChange={(e) => {
+                      setProfileForm({ ...profileForm, email: e.target.value });
+                      if (profileError) setProfileError("");
+                      if (profileSuccess) setProfileSuccess("");
+                    }}
+                    disabled={profileLoading}
                     required
                     placeholder="you@example.com"
                     autoComplete="email"
@@ -242,7 +277,12 @@ export default function Settings() {
                     name="currentPassword"
                     id="currentPassword"
                     value={passwordForm.currentPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    onChange={(e) => {
+                      setPasswordForm({ ...passwordForm, currentPassword: e.target.value });
+                      if (passwordError) setPasswordError("");
+                      if (passwordSuccess) setPasswordSuccess("");
+                    }}
+                    disabled={passwordLoading}
                     required
                     minLength={6}
                     placeholder="Current password"
@@ -265,7 +305,12 @@ export default function Settings() {
                     name="newPassword"
                     id="newPassword"
                     value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    onChange={(e) => {
+                      setPasswordForm({ ...passwordForm, newPassword: e.target.value });
+                      if (passwordError) setPasswordError("");
+                      if (passwordSuccess) setPasswordSuccess("");
+                    }}
+                    disabled={passwordLoading}
                     required
                     minLength={6}
                     placeholder="At least 6 characters"
@@ -288,7 +333,12 @@ export default function Settings() {
                     name="confirmPassword"
                     id="confirmPassword"
                     value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    onChange={(e) => {
+                      setPasswordForm({ ...passwordForm, confirmPassword: e.target.value });
+                      if (passwordError) setPasswordError("");
+                      if (passwordSuccess) setPasswordSuccess("");
+                    }}
+                    disabled={passwordLoading}
                     required
                     minLength={6}
                     placeholder="Re-enter new password"

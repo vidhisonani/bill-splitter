@@ -26,8 +26,11 @@ export default function Expenses() {
         setMyExpenses(response.data.expenses || []);
         setExpenseError("");
       } catch (err) {
-        console.log(err);
-        setExpenseError(err?.response?.data?.message || "Failed to fetch expenses. Please try again.");
+        if (err.response?.data?.errors) {
+          setExpenseError(err.response?.data?.errors[0]?.msg);
+        } else {
+          setExpenseError(err.response?.data?.message || "Failed to fetch expenses. Please try again.");
+        }
       } finally {
         setLoading(false);
       }

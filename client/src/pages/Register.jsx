@@ -41,28 +41,31 @@ function Register() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
+    const { firstName, lastName, email, password, confirmPassword } = formData;
+    if (password.trim() !== confirmPassword.trim()) {
       setError("Passwords do not match");
       return;
     }
-    const { firstName, lastName, email, password, confirmPassword } = formData;
-    formData.firstName = firstName.trim();
-    formData.lastName = lastName.trim();
-    formData.email = email.trim();
-    formData.password = password.trim();
-    formData.confirmPassword = confirmPassword.trim();
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    const dataToSend = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      password: password.trim(),
+    };
+    if (!dataToSend.firstName || !dataToSend.lastName || !dataToSend.email || !dataToSend.password || !confirmPassword.trim()) {
       setError("Please fill all the fields");
       return;
     }
     setLoading(true);
     try {
-      const { confirmPassword, ...dataToSend } = formData;
       const response = await api.post("/auth/register", dataToSend);
       login(response.data);
     } catch (err) {
-      const message = err.response?.data?.message || "Something went wrong";
-      setError(message);
+      if (err.response?.data?.errors) {
+        setError(err.response?.data?.errors[0]?.msg);
+      } else {
+        setError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
