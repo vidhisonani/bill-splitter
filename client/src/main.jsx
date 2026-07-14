@@ -4,12 +4,14 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { Toaster } from 'react-hot-toast'
+import { Analytics } from "@vercel/analytics/react";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <Toaster position="top-right"/>
+      <Toaster position="top-right" />
       <App />
+      <Analytics />
     </AuthProvider>
   </StrictMode>,
 )
