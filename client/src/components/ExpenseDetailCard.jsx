@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { HiOutlineXCircle } from "react-icons/hi2";
+import { HiOutlineLockClosed, HiOutlineXCircle } from "react-icons/hi2";
 import api from "../api";
 import LoadingScreen from "./LoadingScreen";
 import toast from 'react-hot-toast';
 import { useAuth } from "../context/AuthContext";
 import DeleteExpenseModal from "./DeleteExpenseModal";
 
-export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses }) {
+export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses, settlements }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [expense, setExpense] = useState(null);
@@ -46,6 +46,9 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses 
   const isCreator = expense?.createdBy?._id === user?._id;
   const isPayer = expense?.paidBy?._id === user?._id;
   const share = expense?.amount / expense?.splitAmong?.length;
+  const isLocked = expense ? settlements.some(s =>
+    s?.createdAt && new Date(s.createdAt) >= new Date(expense.createdAt)
+  ) : false;
 
   if (loading) return (
     <LoadingScreen />
@@ -159,7 +162,8 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses 
                 })}
               </div>
             </div>
-            {isCreator && (
+            
+            {!isLocked && isCreator && (
               <div className="mt-8 border-t pt-6">
                 {!showDelete ? (
                   <div className="flex justify-end">
@@ -180,6 +184,12 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses 
                     onCancel={() => setShowDelete(false)}
                   />
                 )}
+              </div>
+            )}
+            {isLocked && (
+              <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-600 font-medium bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5 w-full">
+                 <HiOutlineLockClosed className="w-3.5 h-3.5" />
+                Locked after settlement
               </div>
             )}
           </div>
