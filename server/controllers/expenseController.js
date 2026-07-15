@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Expense = require("../models/Expense");
 const Group = require("../models/Group");
 const { check, validationResult } = require("express-validator");
+const Settlement = require('../models/Settlement');
 
 exports.addExpense = [
   check("title")
