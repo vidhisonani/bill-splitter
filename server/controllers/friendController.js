@@ -2,6 +2,7 @@ const User = require("../models/User");
 const FriendRequest = require("../models/FriendRequest");
 const Group = require("../models/Group");
 const Expense = require("../models/Expense");
+const Settlement = require("../models/Settlement");
 const { check, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
 
@@ -144,6 +145,21 @@ exports.getFriendBalances = async (req, res) => {
           }
         })
       }
+      const settlements = await Settlement.find({
+        group: { $in: sharedGroups.map(g => g._id) },
+        $or: [
+          { paidBy: userId, paidTo: friend._id },
+          { paidBy: friend._id, paidTo: userId }
+        ]
+      });
+
+      settlements.forEach(s => {
+        if (s.paidBy.toString() === userId.toString()) {
+          netBalance += s.amount;
+        } else {
+          netBalance -= s.amount;
+        }
+      });
       return {
         friend,
         netBalance: parseFloat(netBalance.toFixed(2))

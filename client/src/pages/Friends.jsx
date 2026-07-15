@@ -59,6 +59,8 @@ export default function Friends() {
       });
       setRequestSent(true);
       setForm({ email: "", message: "" });
+      const sentRes = await api.get("/friends/requests/sent");
+      setSentRequests(sentRes.data);
     } catch (err) {
       setFormError(err.response?.data?.message || "Something went wrong");
     } finally {

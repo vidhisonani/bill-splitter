@@ -89,6 +89,15 @@ exports.deleteExpense = async (req, res) => {
     if (expense.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Unauthorized" })
     }
+    const settlementAfter = await Settlement.findOne({
+      group: expense.group,
+      createdAt: { $gte: expense.createdAt }
+    });
+    if (settlementAfter) {
+      return res.status(400).json({
+        message: "Cannot delete this expense as a settlement has been recorded after it was created."
+      });
+    }
     await expense.deleteOne();
     return res.status(200).json({ message: "Expense deleted successfully", expense })
   } catch (err) {

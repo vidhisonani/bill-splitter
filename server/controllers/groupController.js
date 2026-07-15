@@ -4,6 +4,7 @@ const Expense = require("../models/Expense");
 const FriendRequest = require("../models/FriendRequest");
 const { check, validationResult } = require("express-validator");
 const mongoose = require("mongoose");
+const Settlement = require("../models/Settlement");
 
 exports.createGroup = [
   check("name")
@@ -58,6 +59,19 @@ exports.getMyGroups = async (req, res) => {
         }
       });
 
+      const settlements = await Settlement.find({ group: group._id });
+      settlements.forEach(settlement => {
+        const paidById = settlement.paidBy.toString();
+        const paidToId = settlement.paidTo.toString();
+        const userId = req.user._id.toString();
+
+        if (paidById === userId) {
+          userBalance += settlement.amount;
+        }
+        if (paidToId === userId) {
+          userBalance -= settlement.amount;
+        }
+      });
       const groupObj = group.toObject();
       groupObj.userBalance = userBalance;
       groupsWithBalances.push(groupObj);
