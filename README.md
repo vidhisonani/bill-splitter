@@ -84,4 +84,4 @@ npm run dev
 ```
 
 ## 👩‍💻 Built By
-**Vidhi Sonani** — [GitHub](https://github.com/vidhisonani) · [Portfolio](https://vidhipatel-portfolio.vercel.app/)
+**Vidhi Patel** — [GitHub](https://github.com/vidhisonani) · [Portfolio](https://vidhipatel-portfolio.vercel.app/)

@@ -11,9 +11,14 @@ connectDB();
 
 const app = express();
 
+const origin =
+  process.env.NODE_ENV === "production"
+    ? process.env.CLIENT_URL
+    : "http://localhost:5173";
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true
+  origin,
+  credentials: true,
 }));
 
 app.use(express.json());

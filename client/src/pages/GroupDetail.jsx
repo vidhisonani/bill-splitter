@@ -196,7 +196,7 @@ export default function GroupDetail() {
           </div>
         )}
         {/* stats cards */}
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-6 mb-6'>
           <div className='bg-white rounded-xl border border-gray-200 p-5'>
             <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
             <div className='text-sm font-medium text-gray-500'>₹{totalExpense().toFixed(2)}</div>
@@ -210,9 +210,9 @@ export default function GroupDetail() {
             <div className='text-sm font-medium text-red-400'>₹{youOwed().toFixed(2)}</div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-6">
+        <div className="grid grid-cols-1 gap-y-6 lg:grid-cols-3 lg:gap-6">
           {/* Left column: members + add member */}
-          <div className="col-span-1 space-y-4 order-2 sm:order-none">
+          <div className="col-span-1 space-y-4 order-2 lg:order-none">
             {/* Members card */}
             <MembersCard members={group.members} />
             {/* Add member card */}
@@ -222,7 +222,7 @@ export default function GroupDetail() {
           </div>
 
           {/* Right column: tabs */}
-          <div className="col-span-2 order-1 sm:order-none">
+          <div className="col-span-2 order-1 lg:order-none">
             <div className="bg-white rounded-xl border border-gray-200">
               {/* Tabs */}
               <div className="flex border-b border-gray-200 px-5">

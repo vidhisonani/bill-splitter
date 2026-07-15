@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /groups
+Disallow: /expenses
+Disallow: /friends
+Disallow: /settings
+
+Sitemap: https://split-ease-by-vidhi.vercel.app/sitemap.xml

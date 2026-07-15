@@ -66,7 +66,7 @@ export default function Home() {
   const demo = demos[activeTab];
 
   return (
-    <div className="min-h-screen bg-white text-slate-800">
+    <main className="min-h-screen bg-white text-slate-800">
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
@@ -114,13 +114,13 @@ export default function Home() {
       </section>
 
       <section id="demo" className="max-w-6xl mx-auto px-4 sm:px-6 pb-24 scroll-mt-20">
-        <p className="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">
+        <p className="text-center text-xs font-semibold text-slate-500 uppercase tracking-widest mb-6">
           Interactive demo — click a group to explore
         </p>
 
         <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-lg flex flex-col md:flex-row bg-gray-50">
           <div className="w-full md:w-52 border-b md:border-b-0 md:border-r border-slate-200 bg-white p-4 shrink-0">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-2">Your groups</p>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-2">Your groups</p>
             <div className="flex md:flex-col gap-1 overflow-x-auto no-scrollbar pb-2 md:pb-0">
               {Object.entries(demos).map(([key, d]) => (
                 <button
@@ -140,7 +140,7 @@ export default function Home() {
           <div className="flex-1 px-4 sm:px-6 py-6">
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">{demo.group}</h3>
+                <h2 className="text-lg font-bold text-gray-900">{demo.group}</h2>
                 {demo.description && <p className="text-sm text-gray-500 mt-0.5">{demo.description}</p>}
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-slate-200 py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2">
             <span className="font-medium text-indigo-600">SplitEase</span>
           </div>
@@ -334,6 +334,6 @@ export default function Home() {
         </div>
       </footer>
 
-    </div>
+    </main>
   );
 }
