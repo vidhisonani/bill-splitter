@@ -8,15 +8,15 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 function Register() {
   useDocumentTitle("Register | SplitEase");
 
-  const { login, user } = useAuth();
+  const { login, token } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    if (token) {
       navigate('/dashboard', { replace: true });
     }
-  }, [user, navigate]);
+  }, [token, navigate]);
 
   const [formData, setFormData] = useState({
     firstName: "",

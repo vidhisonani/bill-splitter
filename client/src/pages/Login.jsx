@@ -8,15 +8,15 @@ import useDocumentTitle from '../hooks/useDocumentTitle';
 function Login() {
   useDocumentTitle("Login | SplitEase");
 
-  const { login, user } = useAuth();
+  const { login, token } = useAuth();
   const navigate = useNavigate();
 
   // directly dashboard if logged in
   useEffect(() => {
-    if (user) {
+    if (token) {
       navigate('/dashboard', { replace: true });
     }
-  }, [user, navigate]);
+  }, [token, navigate]);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
