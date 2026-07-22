@@ -1,6 +1,6 @@
 import { HiOutlinePlus } from "react-icons/hi2";
 import { MdError } from "react-icons/md";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api";
 import toast from "react-hot-toast";
 
@@ -13,25 +13,27 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
     title: "",
     amount: "",
     paidBy: user._id,
-    splitAmong: group?.members.map(m => m._id) || [],
+    splitAmong: group?.members.map((m) => m._id) || [],
   });
 
   const [expenseForm, setExpenseForm] = useState(getInitialExpenseForm);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setExpenseForm(prev => ({
+    setExpenseForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (expenseError) setExpenseError("");
-  }
+  };
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
     const trimmedTitle = expenseForm.title.trim();
     if (expenseForm.splitAmong.length === 0) {
-      setExpenseError("Please select at least one member to split the expense with.");
+      setExpenseError(
+        "Please select at least one member to split the expense with."
+      );
       return;
     }
     if (!trimmedTitle) {
@@ -67,18 +69,28 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
     } finally {
       setExpenseLoading(false);
     }
-  }
+  };
 
+  useEffect(() => {
+    if (!showExpenseModal) return;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showExpenseModal]);
   return (
     <>
-      <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer"
+      <button
+        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer"
         onClick={() => {
           setExpenseForm(getInitialExpenseForm());
           setExpenseError("");
           setShowExpenseModal(true);
         }}
       >
-        <HiOutlinePlus className="w-5 h-5" strokeWidth='3px' />
+        <HiOutlinePlus className="w-5 h-5" strokeWidth="3px" />
         Add Expense
       </button>
 
@@ -86,11 +98,15 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
       {showExpenseModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Add Expense</h2>
-            <p className="text-sm text-gray-500 mb-5">Add a new expense to the group.</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">
+              Add Expense
+            </h2>
+            <p className="text-sm text-gray-500 mb-5">
+              Add a new expense to the group.
+            </p>
 
             {expenseError && (
-              <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
+              <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3">
                 <MdError size={16} />
                 <p>{expenseError}</p>
               </div>
@@ -140,9 +156,11 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition text-sm cursor-pointer"
                 >
-                  {group.members.map(m => (
+                  {group.members.map((m) => (
                     <option key={m._id} value={m._id}>
-                      {m._id === user._id ? "You" : `${m.firstName} ${m.lastName}`}
+                      {m._id === user._id
+                        ? "You"
+                        : `${m.firstName} ${m.lastName}`}
                     </option>
                   ))}
                 </select>
@@ -156,7 +174,12 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setExpenseForm(prev => ({ ...prev, splitAmong: group.members.map(m => m._id) }))}
+                      onClick={() =>
+                        setExpenseForm((prev) => ({
+                          ...prev,
+                          splitAmong: group.members.map((m) => m._id),
+                        }))
+                      }
                       className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
                       Select All
@@ -164,7 +187,9 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                     <span className="text-gray-300 text-xs">|</span>
                     <button
                       type="button"
-                      onClick={() => setExpenseForm(prev => ({ ...prev, splitAmong: [] }))}
+                      onClick={() =>
+                        setExpenseForm((prev) => ({ ...prev, splitAmong: [] }))
+                      }
                       className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
                       Select None
@@ -176,19 +201,31 @@ export default function AddExpenseModal({ id, user, group, fetchGroupAndExpenses
                   {group.members.map((m) => {
                     const isChecked = expenseForm.splitAmong.includes(m._id);
                     return (
-                      <label key={m._id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+                      <label
+                        key={m._id}
+                        className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none"
+                      >
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={(e) => {
                             const updated = e.target.checked
                               ? [...expenseForm.splitAmong, m._id]
-                              : expenseForm.splitAmong.filter(id => id !== m._id);
-                            setExpenseForm(prev => ({ ...prev, splitAmong: updated }));
+                              : expenseForm.splitAmong.filter(
+                                  (id) => id !== m._id
+                                );
+                            setExpenseForm((prev) => ({
+                              ...prev,
+                              splitAmong: updated,
+                            }));
                           }}
                           className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
-                        <span>{m._id === user._id ? "You" : `${m.firstName} ${m.lastName}`}</span>
+                        <span>
+                          {m._id === user._id
+                            ? "You"
+                            : `${m.firstName} ${m.lastName}`}
+                        </span>
                       </label>
                     );
                   })}

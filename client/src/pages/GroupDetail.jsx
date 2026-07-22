@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api';
-import { useAuth } from '../context/AuthContext';
-import { HiOutlineArrowLeft, HiOutlineExclamationTriangle } from 'react-icons/hi2';
-import Sidebar from '../components/Sidebar';
-import DeleteGroupModal from '../components/DeleteGroupModal';
-import AddExpenseModal from '../components/AddExpenseModal';
-import MembersCard from '../components/MembersCard';
-import AddMemberCard from '../components/AddMemberCard';
-import { getInitials, avatarColors } from '../utils/avatar';
-import LoadingScreen from '../components/LoadingScreen';
-import ExpenseDetailCard from '../components/ExpenseDetailCard';
-import useDocumentTitle from '../hooks/useDocumentTitle';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../api";
+import { useAuth } from "../context/AuthContext";
+import {
+  HiOutlineArrowLeft,
+  HiOutlineExclamationTriangle,
+} from "react-icons/hi2";
+import Sidebar from "../components/Sidebar";
+import DeleteGroupModal from "../components/DeleteGroupModal";
+import AddExpenseModal from "../components/AddExpenseModal";
+import MembersCard from "../components/MembersCard";
+import AddMemberCard from "../components/AddMemberCard";
+import { getInitials, avatarColors } from "../utils/avatar";
+import ExpenseDetailCard from "../components/ExpenseDetailCard";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import toast from "react-hot-toast";
+import GroupDetailSkeleton from "../components/skeletons/GroupDetailSkeleton";
 
 export default function GroupDetail() {
   const { id } = useParams();
@@ -34,23 +37,23 @@ export default function GroupDetail() {
       const [groupRes, expensesRes, settlementsRes] = await Promise.allSettled([
         api.get(`/groups/${id}`),
         api.get(`/groups/${id}/expenses`),
-        api.get(`/groups/${id}/settlements`)
+        api.get(`/groups/${id}/settlements`),
       ]);
 
-      if (groupRes.status === 'fulfilled') {
+      if (groupRes.status === "fulfilled") {
         setGroup(groupRes.value.data.group);
       } else {
-        navigate('/groups');
+        navigate("/groups");
         return;
       }
-      if (expensesRes.status === 'fulfilled') {
+      if (expensesRes.status === "fulfilled") {
         setExpenses(expensesRes.value.data.expenses);
       }
-      if (settlementsRes.status === 'fulfilled') {
+      if (settlementsRes.status === "fulfilled") {
         setSettlements(settlementsRes.value.data.settlements);
       }
     } catch (err) {
-      navigate('/groups');
+      navigate("/groups");
     } finally {
       setLoading(false);
     }
@@ -59,19 +62,17 @@ export default function GroupDetail() {
     fetchGroupAndExpenses();
   }, [id]);
 
-  useDocumentTitle(
-    `${group?.name || "Group Details"} | SplitEase`
-  );
+  useDocumentTitle(`${group?.name || "Group Details"} | SplitEase`);
 
   const getBalances = () => {
     if (!group || expenses.length === 0) return [];
 
     const balanceMap = {};
-    group.members.forEach(m => {
+    group.members.forEach((m) => {
       balanceMap[m._id] = 0;
     });
 
-    expenses.forEach(exp => {
+    expenses.forEach((exp) => {
       const paidById = exp.paidBy?._id;
       const amount = exp.amount;
       const splitCount = exp.splitAmong?.length || 0;
@@ -83,56 +84,58 @@ export default function GroupDetail() {
         balanceMap[paidById] += amount;
       }
 
-      exp.splitAmong?.forEach(member => {
+      exp.splitAmong?.forEach((member) => {
         const memberId = member._id;
         if (balanceMap[memberId] !== undefined) {
           balanceMap[memberId] -= share;
         }
       });
     });
-    settlements.forEach(s => {
-      if (balanceMap[s.paidBy._id] !== undefined) balanceMap[s.paidBy._id] += s.amount;
-      if (balanceMap[s.paidTo._id] !== undefined) balanceMap[s.paidTo._id] -= s.amount;
+    settlements.forEach((s) => {
+      if (balanceMap[s.paidBy._id] !== undefined)
+        balanceMap[s.paidBy._id] += s.amount;
+      if (balanceMap[s.paidTo._id] !== undefined)
+        balanceMap[s.paidTo._id] -= s.amount;
     });
     return group.members.map((m, index) => ({
       member: m,
       balance: Math.round(balanceMap[m._id] * 100) / 100 || 0,
-      colorClass: avatarColors[index % avatarColors.length]
+      colorClass: avatarColors[index % avatarColors.length],
     }));
   };
 
   const totalExpense = () => {
     try {
       let totalAmount = 0;
-      expenses.forEach(expense => {
+      expenses.forEach((expense) => {
         totalAmount += expense.amount;
       });
       return totalAmount;
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
   const myPaid = () => {
     let totalAmount = 0;
-    expenses.forEach(expense => {
+    expenses.forEach((expense) => {
       if (expense.paidBy._id === user._id) {
         totalAmount += expense.amount;
       }
-    })
+    });
     return totalAmount;
-  }
+  };
 
   const youOwed = () => {
     let totalAmount = 0;
-    expenses.forEach(expense => {
+    expenses.forEach((expense) => {
       const paidByMe = expense.paidBy?._id === user._id;
-      const involved = expense.splitAmong?.some(m => m._id === user._id);
+      const involved = expense.splitAmong?.some((m) => m._id === user._id);
       if (!paidByMe && involved) {
         totalAmount += expense.amount / (expense.splitAmong?.length || 1);
       }
     });
-    settlements.forEach(s => {
+    settlements.forEach((s) => {
       if (s.paidBy._id === user._id) totalAmount -= s.amount;
     });
     return Math.max(0, totalAmount);
@@ -143,24 +146,25 @@ export default function GroupDetail() {
     if (balances.length === 0) return [];
 
     const creditors = balances
-      .filter(b => b.balance > 0.1)
-      .map(b => ({ member: b.member, amount: b.balance }))
+      .filter((b) => b.balance > 0.1)
+      .map((b) => ({ member: b.member, amount: b.balance }))
       .sort((a, b) => b.amount - a.amount);
 
     const debtors = balances
-      .filter(b => b.balance < -0.1)
-      .map(b => ({ member: b.member, amount: Math.abs(b.balance) }))
+      .filter((b) => b.balance < -0.1)
+      .map((b) => ({ member: b.member, amount: Math.abs(b.balance) }))
       .sort((a, b) => b.amount - a.amount);
 
     const transactions = [];
-    let i = 0, j = 0;
+    let i = 0,
+      j = 0;
 
     while (i < debtors.length && j < creditors.length) {
       const amount = Math.min(debtors[i].amount, creditors[j].amount);
       transactions.push({
         from: debtors[i].member,
         to: creditors[j].member,
-        amount: amount.toFixed(2)
+        amount: amount.toFixed(2),
       });
       debtors[i].amount -= amount;
       creditors[j].amount -= amount;
@@ -185,20 +189,25 @@ export default function GroupDetail() {
     }
   };
 
-  if (loading) return <LoadingScreen />
-  if (!group) return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <main className="md:ml-56 flex-1 flex items-center justify-center pt-24">
-        <div className="text-center">
-          <p className="text-gray-500 font-medium">Group not found</p>
-          <button onClick={() => navigate('/groups')} className="text-indigo-600 text-sm mt-2">
-            Back to Groups
-          </button>
-        </div>
-      </main>
-    </div>
-  );
+  if (loading) return <GroupDetailSkeleton />;
+
+  if (!group)
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <main className="md:ml-56 flex-1 flex items-center justify-center pt-24">
+          <div className="text-center">
+            <p className="text-gray-500 font-medium">Group not found</p>
+            <button
+              onClick={() => navigate("/groups")}
+              className="text-indigo-600 text-sm mt-2"
+            >
+              Back to Groups
+            </button>
+          </div>
+        </main>
+      </div>
+    );
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -208,24 +217,38 @@ export default function GroupDetail() {
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4 transition">
+            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4 transition"
+          >
             <HiOutlineArrowLeft className="w-4 h-4" /> Back
           </button>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{group?.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {group?.name}
+              </h1>
               {group.description && (
-                <p className="text-sm text-gray-500 mt-1">{group.description}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {group.description}
+                </p>
               )}
               {group.createdAt && (
-                <p className="text-sm text-gray-400 mt-1"> Created on {new Date(group.createdAt).toLocaleDateString("en-US", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {" "}
+                  Created on{" "}
+                  {new Date(group.createdAt).toLocaleDateString("en-US", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
               )}
             </div>
-            <AddExpenseModal id={group._id} user={user} group={group} fetchGroupAndExpenses={fetchGroupAndExpenses} />
+            <AddExpenseModal
+              id={group._id}
+              user={user}
+              group={group}
+              fetchGroupAndExpenses={fetchGroupAndExpenses}
+            />
           </div>
         </div>
         {error && (
@@ -235,18 +258,26 @@ export default function GroupDetail() {
           </div>
         )}
         {/* stats cards */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-6 mb-6'>
-          <div className='bg-white rounded-xl border border-gray-200 p-5'>
-            <div className='text-sm font-semibold text-gray-900'>Total Group Expenses</div>
-            <div className='text-sm font-medium text-gray-500'>₹{totalExpense().toFixed(2)}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-6 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="text-sm font-semibold text-gray-900">
+              Total Group Expenses
+            </div>
+            <div className="text-sm font-medium text-gray-500">
+              ₹{totalExpense().toFixed(2)}
+            </div>
           </div>
-          <div className='bg-white rounded-xl border border-gray-200 p-5'>
-            <div className='text-sm font-semibold text-gray-900'>You Paid</div>
-            <div className='text-sm font-medium text-green-400'>₹{myPaid().toFixed(2)}</div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="text-sm font-semibold text-gray-900">You Paid</div>
+            <div className="text-sm font-medium text-green-400">
+              ₹{myPaid().toFixed(2)}
+            </div>
           </div>
-          <div className='bg-white rounded-xl border border-gray-200 p-5'>
-            <div className='text-sm font-semibold text-gray-900'>You Owe</div>
-            <div className='text-sm font-medium text-red-400'>₹{youOwed().toFixed(2)}</div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="text-sm font-semibold text-gray-900">You Owe</div>
+            <div className="text-sm font-medium text-red-400">
+              ₹{youOwed().toFixed(2)}
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-y-6 lg:grid-cols-3 lg:gap-6">
@@ -255,7 +286,10 @@ export default function GroupDetail() {
             {/* Members card */}
             <MembersCard members={group.members} />
             {/* Add member card */}
-            <AddMemberCard id={group._id} fetchGroupAndExpenses={fetchGroupAndExpenses} />
+            <AddMemberCard
+              id={group._id}
+              fetchGroupAndExpenses={fetchGroupAndExpenses}
+            />
             {/* Delete Group */}
             <DeleteGroupModal groupId={group._id} group={group} />
           </div>
@@ -267,19 +301,21 @@ export default function GroupDetail() {
               <div className="flex border-b border-gray-200 px-5">
                 <button
                   onClick={() => setActiveTab("expenses")}
-                  className={`py-3.5 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${activeTab === "expenses"
-                    ? "border-indigo-600 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                    }`}
+                  className={`py-3.5 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${
+                    activeTab === "expenses"
+                      ? "border-indigo-600 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
                 >
                   Expenses
                 </button>
                 <button
                   onClick={() => setActiveTab("balances")}
-                  className={`py-3.5 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${activeTab === "balances"
-                    ? "border-indigo-600 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                    }`}
+                  className={`py-3.5 px-4 text-sm font-medium border-b-2 transition cursor-pointer ${
+                    activeTab === "balances"
+                      ? "border-indigo-600 text-indigo-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
                 >
                   Balances
                 </button>
@@ -287,41 +323,69 @@ export default function GroupDetail() {
 
               {/* Tab content */}
               <div className="p-5">
-                {activeTab === "expenses" && (
-                  expenses.length === 0 ? (
+                {activeTab === "expenses" &&
+                  (expenses.length === 0 ? (
                     <div className="text-center py-12 text-gray-400">
                       <p className="text-sm">No expenses yet.</p>
-                      <p className="text-xs mt-1">Add the first expense to get started.</p>
+                      <p className="text-xs mt-1">
+                        Add the first expense to get started.
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {expenses.map((expense) => {
                         const paidByUser = expense.paidBy?._id === user._id;
-                        const involved = expense.splitAmong?.some(m => m._id === user._id);
-                        const shareAmount = involved ? Math.round((expense.amount / (expense.splitAmong?.length || 1)) * 100) / 100 : 0;
+                        const involved = expense.splitAmong?.some(
+                          (m) => m._id === user._id
+                        );
+                        const shareAmount = involved
+                          ? Math.round(
+                              (expense.amount /
+                                (expense.splitAmong?.length || 1)) *
+                                100
+                            ) / 100
+                          : 0;
 
                         return (
-                          <div key={expense._id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition cursor-pointer"
-                            onClick={() => { setShowExpenseCard(true), setExpenseId(expense._id) }}
+                          <div
+                            key={expense._id}
+                            className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition cursor-pointer"
+                            onClick={() => {
+                              setShowExpenseCard(true),
+                                setExpenseId(expense._id);
+                            }}
                           >
-
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
-                                {expense.title ? expense.title[0].toUpperCase() : "E"}
+                                {expense.title
+                                  ? expense.title[0].toUpperCase()
+                                  : "E"}
                               </div>
                               <div>
-                                <h4 className="font-semibold text-gray-900 text-sm">{expense.title}</h4>
+                                <h4 className="font-semibold text-gray-900 text-sm">
+                                  {expense.title}
+                                </h4>
                                 <p className="text-xs text-gray-400">
-                                  Paid by {paidByUser ? "you" : `${expense.paidBy?.firstName} ${expense.paidBy?.lastName}`} • {new Date(expense.createdAt).toLocaleDateString()}
+                                  Paid by{" "}
+                                  {paidByUser
+                                    ? "you"
+                                    : `${expense.paidBy?.firstName} ${expense.paidBy?.lastName}`}{" "}
+                                  •{" "}
+                                  {new Date(
+                                    expense.createdAt
+                                  ).toLocaleDateString()}
                                 </p>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-semibold text-gray-900">₹{expense.amount.toFixed(2)}</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                ₹{expense.amount.toFixed(2)}
+                              </p>
                               {paidByUser ? (
                                 involved ? (
                                   <p className="text-xs text-emerald-500 font-medium">
-                                    You lent ₹{(expense.amount - shareAmount).toFixed(2)}
+                                    You lent ₹
+                                    {(expense.amount - shareAmount).toFixed(2)}
                                   </p>
                                 ) : (
                                   <p className="text-xs text-emerald-500 font-medium">
@@ -333,46 +397,71 @@ export default function GroupDetail() {
                                   You owe ₹{shareAmount.toFixed(2)}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400">Not involved</p>
+                                <p className="text-xs text-gray-400">
+                                  Not involved
+                                </p>
                               )}
                             </div>
                           </div>
                         );
                       })}
-                      {showExpenseCard && <ExpenseDetailCard expenseId={expenseId} onClose={() => setShowExpenseCard(false)} refreshExpenses={fetchGroupAndExpenses} settlements={settlements} />}
+                      {showExpenseCard && (
+                        <ExpenseDetailCard
+                          expenseId={expenseId}
+                          onClose={() => setShowExpenseCard(false)}
+                          refreshExpenses={fetchGroupAndExpenses}
+                          settlements={settlements}
+                        />
+                      )}
                     </div>
-                  )
-                )}
-                {activeTab === "balances" && (
-                  expenses.length === 0 ? (
+                  ))}
+                {activeTab === "balances" &&
+                  (expenses.length === 0 ? (
                     <div className="text-center py-12 text-gray-400">
                       <p className="text-sm">No balances yet.</p>
-                      <p className="text-xs mt-1">Add expenses to see who owes what.</p>
+                      <p className="text-xs mt-1">
+                        Add expenses to see who owes what.
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {getBalances().map(({ member, balance, colorClass }) => {
                         const isYou = member._id === user._id;
                         return (
-                          <div key={member._id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                          <div
+                            key={member._id}
+                            className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100"
+                          >
                             <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white text-xs font-semibold`}>
+                              <div
+                                className={`w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white text-xs font-semibold`}
+                              >
                                 {getInitials(member.firstName, member.lastName)}
                               </div>
                               <div>
                                 <h4 className="font-semibold text-gray-900 text-sm">
-                                  {isYou ? "You" : `${member.firstName} ${member.lastName}`}
+                                  {isYou
+                                    ? "You"
+                                    : `${member.firstName} ${member.lastName}`}
                                 </h4>
-                                <p className="text-xs text-gray-400">{member.email}</p>
+                                <p className="text-xs text-gray-400">
+                                  {member.email}
+                                </p>
                               </div>
                             </div>
                             <div className="text-right">
                               {Math.abs(balance) < 0.1 ? (
-                                <span className="text-sm font-medium text-gray-400">Settled</span>
+                                <span className="text-sm font-medium text-gray-400">
+                                  Settled
+                                </span>
                               ) : balance > 0 ? (
-                                <span className="text-sm font-medium text-emerald-500">Gets back ₹{balance.toFixed(2)}</span>
+                                <span className="text-sm font-medium text-emerald-500">
+                                  Gets back ₹{balance.toFixed(2)}
+                                </span>
                               ) : (
-                                <span className="text-sm font-medium text-red-500">Owes ₹{Math.abs(balance).toFixed(2)}</span>
+                                <span className="text-sm font-medium text-red-500">
+                                  Owes ₹{Math.abs(balance).toFixed(2)}
+                                </span>
                               )}
                             </div>
                           </div>
@@ -386,23 +475,35 @@ export default function GroupDetail() {
                           </p>
                           <div className="space-y-2">
                             {getSimplifiedDebts().map((t, i) => (
-                              <div key={i} className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-indigo-50">
+                              <div
+                                key={i}
+                                className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-indigo-50"
+                              >
                                 <span className="text-sm text-slate-600">
                                   <span className="font-semibold text-slate-900">
-                                    {t.from._id === user._id ? "You" : `${t.from.firstName} ${t.from.lastName} `}
-                                    {" "}
+                                    {t.from._id === user._id
+                                      ? "You"
+                                      : `${t.from.firstName} ${t.from.lastName} `}{" "}
                                   </span>
-                                  <span>{t.from._id === user._id ? "pay" : "pays"}</span>
+                                  <span>
+                                    {t.from._id === user._id ? "pay" : "pays"}
+                                  </span>
                                   {" to "}
                                   <span className="font-semibold text-slate-900">
-                                    {t.to._id === user._id ? "you" : `${t.to.firstName} ${t.to.lastName}`}
+                                    {t.to._id === user._id
+                                      ? "you"
+                                      : `${t.to.firstName} ${t.to.lastName}`}
                                   </span>
                                 </span>
                                 <div className="flex items-center gap-3">
-                                  <span className="font-bold text-indigo-600">₹{t.amount}</span>
+                                  <span className="font-bold text-indigo-600">
+                                    ₹{t.amount}
+                                  </span>
                                   {t.from._id === user._id && (
                                     <button
-                                      onClick={() => handleSettleUp(t.to._id, t.amount)}
+                                      onClick={() =>
+                                        handleSettleUp(t.to._id, t.amount)
+                                      }
                                       disabled={settlingUp}
                                       className="px-3 py-1 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 disabled:cursor-not-allowed text-white rounded-lg transition cursor-pointer"
                                     >
@@ -424,20 +525,36 @@ export default function GroupDetail() {
                           </p>
                           <div className="space-y-2">
                             {settlements.map((s, i) => (
-                              <div key={s._id} className="flex items-center justify-between bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-100">
+                              <div
+                                key={s._id}
+                                className="flex items-center justify-between bg-gray-50 px-3 py-2.5 rounded-lg border border-gray-100"
+                              >
                                 <span className="text-sm text-gray-600">
                                   <span className="font-semibold text-gray-900">
-                                    {s.paidBy._id === user._id ? "You" : `${s.paidBy.firstName} ${s.paidBy.lastName}`}
+                                    {s.paidBy._id === user._id
+                                      ? "You"
+                                      : `${s.paidBy.firstName} ${s.paidBy.lastName}`}
                                   </span>
                                   {" paid "}
                                   <span className="font-semibold text-gray-900">
-                                    {s.paidTo._id === user._id ? "you" : `${s.paidTo.firstName} ${s.paidTo.lastName}`}
+                                    {s.paidTo._id === user._id
+                                      ? "you"
+                                      : `${s.paidTo.firstName} ${s.paidTo.lastName}`}
                                   </span>
                                 </span>
                                 <div className="flex items-center gap-3">
-                                  <span className="text-sm font-bold text-emerald-600">₹{s.amount}</span>
+                                  <span className="text-sm font-bold text-emerald-600">
+                                    ₹{s.amount}
+                                  </span>
                                   <span className="text-xs text-gray-400">
-                                    {new Date(s.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    {new Date(s.createdAt).toLocaleDateString(
+                                      "en-IN",
+                                      {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                      }
+                                    )}
                                   </span>
                                 </div>
                               </div>
@@ -446,8 +563,7 @@ export default function GroupDetail() {
                         </div>
                       )}
                     </div>
-                  )
-                )}
+                  ))}
               </div>
             </div>
           </div>

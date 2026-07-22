@@ -5,10 +5,10 @@ import Sidebar from '../components/Sidebar';
 import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import CreateGroupModal from '../components/CreateGroupModal';
 import useGroups from '../hooks/useGroups';
-import LoadingScreen from '../components/LoadingScreen';
 import CreateGroupCard from '../components/CreateGroupCard';
 import GroupDetailsCards from '../components/GroupsDetailsCards';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import DashboardSkeleton from "../components/skeletons/DashboardSkeleton";
 
 function Dashboard() {
   useDocumentTitle("Dashboard | SplitEase");
@@ -35,7 +35,7 @@ function Dashboard() {
     setGroups(prev => [...prev, group]);
   }, [setGroups]);
 
-  if (loading) return <LoadingScreen />;
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
