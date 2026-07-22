@@ -4,9 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus, HiOutlineCheck, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { MdError } from 'react-icons/md';
-import LoadingScreen from '../components/LoadingScreen';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
+import FriendsSkeleton from '../components/skeletons/FriendsSkeleton';
 
 export default function Friends() {
   useDocumentTitle("Friends | SplitEase");
@@ -92,7 +92,7 @@ export default function Friends() {
     }
   };
 
-  if (loading) return <LoadingScreen />
+  if (loading) return <FriendsSkeleton />
 
   return (
     <div className="flex min-h-screen bg-gray-50">

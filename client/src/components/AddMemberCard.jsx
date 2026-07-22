@@ -41,7 +41,7 @@ export default function AddMemberCard({ id, fetchGroupAndExpenses }) {
           <HiOutlineUserPlus className="w-4 h-4" /> Add Member
         </h2>
         {memberError && (
-          <div className='flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3'>
+          <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200 text-sm text-red-600 mb-3">
             <MdError size={16} />
             <p>{memberError}</p>
           </div>
@@ -69,5 +69,5 @@ export default function AddMemberCard({ id, fetchGroupAndExpenses }) {
         </form>
       </div>
     </>
-  )
+  );
 }

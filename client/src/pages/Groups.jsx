@@ -1,12 +1,12 @@
 import Sidebar from "../components/Sidebar";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import { useState, useCallback } from "react";
-import LoadingScreen from "../components/LoadingScreen";
 import CreateGroupModal from '../components/CreateGroupModal';
 import CreateGroupCard from "../components/CreateGroupCard";
 import useGroups from '../hooks/useGroups';
 import GroupDetailsCards from '../components/GroupsDetailsCards';
 import useDocumentTitle from "../hooks/useDocumentTitle";
+import GroupSkeleton from "../components/skeletons/GroupsSkeleton";
 
 export default function Groups() {
   useDocumentTitle("Groups | SplitEase");
@@ -18,7 +18,7 @@ export default function Groups() {
     setGroups(prev => [...prev, group]);
   }, [setGroups]);
 
-  if (loading) return <LoadingScreen />
+  if (loading) return <GroupSkeleton />
 
   return (
     <div className="flex min-h-screen bg-gray-50">

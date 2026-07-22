@@ -2,11 +2,16 @@ import { useEffect, useState } from "react";
 import { HiOutlineLockClosed, HiOutlineXCircle } from "react-icons/hi2";
 import api from "../api";
 import LoadingScreen from "./LoadingScreen";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import DeleteExpenseModal from "./DeleteExpenseModal";
 
-export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses, settlements }) {
+export default function ExpenseDetailCard({
+  expenseId,
+  onClose,
+  refreshExpenses,
+  settlements,
+}) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [expense, setExpense] = useState(null);
@@ -27,7 +32,7 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (error) {
@@ -42,17 +47,24 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
     }
   }, [expenseId]);
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   const isCreator = expense?.createdBy?._id === user?._id;
   const isPayer = expense?.paidBy?._id === user?._id;
   const share = expense?.amount / expense?.splitAmong?.length;
-  const isLocked = expense ? settlements.some(s =>
-    s?.createdAt && new Date(s.createdAt) >= new Date(expense.createdAt)
-  ) : false;
+  const isLocked = expense
+    ? settlements.some(
+        (s) =>
+          s?.createdAt && new Date(s.createdAt) >= new Date(expense.createdAt)
+      )
+    : false;
 
-  if (loading) return (
-    <LoadingScreen />
-  )
+  if (loading) return <LoadingScreen />;
 
   if (error) return null;
   return (
@@ -65,9 +77,7 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b px-6 py-5">
-          <h2 className="text-xl font-bold text-gray-900">
-            Expense Details
-          </h2>
+          <h2 className="text-xl font-bold text-gray-900">Expense Details</h2>
           <button
             onClick={onClose}
             className="rounded-full p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
@@ -141,7 +151,8 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {expense.splitAmong.map((member) => {
-                  const isYou = member?._id?.toString() === user?._id?.toString();
+                  const isYou =
+                    member?._id?.toString() === user?._id?.toString();
                   return (
                     <div
                       key={member._id}
@@ -158,11 +169,11 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
                         ₹{share.toFixed(2)}
                       </span>
                     </div>
-                  )
+                  );
                 })}
               </div>
             </div>
-            
+
             {!isLocked && isCreator && (
               <div className="mt-8 border-t pt-6">
                 {!showDelete ? (
@@ -188,7 +199,7 @@ export default function ExpenseDetailCard({ expenseId, onClose, refreshExpenses,
             )}
             {isLocked && (
               <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-indigo-600 font-medium bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5 w-full">
-                 <HiOutlineLockClosed className="w-3.5 h-3.5" />
+                <HiOutlineLockClosed className="w-3.5 h-3.5" />
                 Locked after settlement
               </div>
             )}
