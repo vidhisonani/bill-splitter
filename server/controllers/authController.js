@@ -94,11 +94,6 @@ exports.getMe = async (req, res) => {
 }
 
 exports.updateProfile = [
-  check('email')
-    .trim()
-    .isEmail()
-    .withMessage("Invalid email address")
-    .normalizeEmail(),
   check('firstName')
     .trim()
     .notEmpty()
@@ -113,23 +108,14 @@ exports.updateProfile = [
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const { firstName, lastName, email } = req.body;
+      const { firstName, lastName } = req.body;
       const user = await User.findById(req.user._id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      if (email && email.trim().toLowerCase() !== user.email) {
-        const existing = await User.findOne({
-          email: email.trim().toLowerCase(),
-        });
-        if (existing) {
-          return res.status(400).json({ message: "Email already in use" });
-        }
-      }
       if (user) {
         user.firstName = firstName ? firstName.trim() : user.firstName;
         user.lastName = lastName ? lastName.trim() : user.lastName;
-        user.email = email ? email.trim().toLowerCase() : user.email;
         await user.save();
       }
       return res.status(200).json({

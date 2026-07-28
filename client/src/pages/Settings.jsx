@@ -41,7 +41,6 @@ export default function Settings() {
   const [profileForm, setProfileForm] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
-    email: user?.email || "",
   });
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
@@ -84,7 +83,6 @@ export default function Settings() {
     let profErrors = "";
     if (name === "firstName") profErrors = validateName(value, "First Name");
     if (name === "lastName") profErrors = validateName(value, "Last Name");
-    if (name === "email") profErrors = validateEmail(value);
     setProfErrors((prev) => ({
       ...prev,
       [name]: profErrors,
@@ -98,28 +96,24 @@ export default function Settings() {
 
     const firstNameError = validateName(profileForm.firstName, "First Name");
     const lastNameError = validateName(profileForm.lastName, "Last Name");
-    const emailError = validateEmail(profileForm.email);
 
     setProfErrors({
       firstName: firstNameError,
       lastName: lastNameError,
-      email: emailError,
     });
-    if (firstNameError || lastNameError || emailError) return;
+    if (firstNameError || lastNameError) return;
 
     setProfileLoading(true);
 
     try {
       const response = await api.put("/auth/profile", {
         firstName: profileForm.firstName.trim(),
-        lastName: profileForm.lastName.trim(),
-        email: profileForm.email.trim(),
+        lastName: profileForm.lastName.trim()
       });
       updateUser(response.data.user);
       setProfileForm({
         firstName: response.data.user.firstName,
-        lastName: response.data.user.lastName,
-        email: response.data.user.email,
+        lastName: response.data.user.lastName
       });
       setProfErrors({});
       setProfileSuccess("Profile updated successfully!");
@@ -275,11 +269,10 @@ export default function Settings() {
                     required
                     placeholder="Vidhi"
                     autoComplete="given-name"
-                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                      profErrors.firstName
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                    }`}
+                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${profErrors.firstName
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      }`}
                   />
                 </div>
                 {profErrors.firstName && (
@@ -318,11 +311,10 @@ export default function Settings() {
                     required
                     placeholder="Patel"
                     autoComplete="family-name"
-                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                      profErrors.lastName
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                    }`}
+                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${profErrors.lastName
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      }`}
                   />
                 </div>
                 {profErrors.lastName && (
@@ -337,47 +329,16 @@ export default function Settings() {
                 )}
               </div>
 
+              {/* just display cannot modify email */}
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1.5"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Email
                 </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
-                    <MdEmail size={18} />
-                  </span>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    value={profileForm.email}
-                    onChange={handleProfChange}
-                    onBlur={(e) =>
-                      validateProfileField("email", e.target.value)
-                    }
-                    disabled={profileLoading}
-                    required
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                      profErrors.email
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                    }`}
-                  />
+                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 md:text-md cursor-not-allowed">
+                  <MdEmail size={18} className="text-gray-400" />
+                  {user?.email}
+                  <span className="ml-auto"><MdLock size={18} className="text-gray-600" /></span>
                 </div>
-                {profErrors.email && (
-                  <div
-                    role="alert"
-                    aria-live="polite"
-                    className="flex items-center gap-2 px-2 py-1 mt-1 text-sm text-red-600"
-                  >
-                    <MdError size={18} className="shrink-0" />
-                    {profErrors.email}
-                  </div>
-                )}
               </div>
 
               <button
@@ -439,11 +400,10 @@ export default function Settings() {
                       minLength={6}
                       placeholder="Current password"
                       autoComplete="current-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                        passErrors.currentPassword
-                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                      }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.currentPassword
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                        }`}
                     />
                     <CurrentEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"
@@ -489,11 +449,10 @@ export default function Settings() {
                       minLength={6}
                       placeholder="At least 6 characters"
                       autoComplete="new-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                        passErrors.newPassword
-                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                      }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.newPassword
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                        }`}
                     />
                     <NewEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"
@@ -539,11 +498,10 @@ export default function Settings() {
                       minLength={6}
                       placeholder="Re-enter new password"
                       autoComplete="new-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
-                        passErrors.confirmPassword
-                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                      }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.confirmPassword
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                        }`}
                     />
                     <ConfirmEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"

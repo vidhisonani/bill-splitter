@@ -7,6 +7,7 @@ import { MdError } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import FriendsSkeleton from '../components/skeletons/FriendsSkeleton';
+import { getInitials } from '../utils/avatar';
 
 export default function Friends() {
   useDocumentTitle("Friends | SplitEase");
@@ -274,7 +275,7 @@ export default function Friends() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
-                        {friend.firstName?.[0]}{friend.lastName?.[0]}
+                        {getInitials(friend.firstName, friend.lastName)}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
