@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "", // URL to avatar image (v2 feature)
+      default: "",
     },
   },
   { timestamps: true }

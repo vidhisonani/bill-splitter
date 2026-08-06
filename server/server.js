@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require('./routes/groupRoutes')
 const { groupExpenseRouter, expenseRouter } = require('./routes/expenseRoutes');
 const friendRoutes = require('./routes/friendRoutes');
+const cloudinary = require("./cloudinary/cloudinary");
 
 connectDB();
 
@@ -21,7 +22,8 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Bill Splitter API is running...");

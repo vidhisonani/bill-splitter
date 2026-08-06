@@ -96,8 +96,8 @@ exports.getFriends = async (req, res) => {
         { sender: req.user._id, status: "accepted" },
         { receiver: req.user._id, status: "accepted" }
       ]
-    }).populate("sender", "firstName lastName email")
-      .populate("receiver", "firstName lastName email");
+    }).populate("sender", "firstName lastName email avatar")
+      .populate("receiver", "firstName lastName email avatar");
     return res.status(200).json(friends);
   } catch (err) {
     return res.status(500).json({ message: "Internal Server Error" });
@@ -112,8 +112,8 @@ exports.getFriendBalances = async (req, res) => {
         { sender: req.user._id, status: "accepted" },
         { receiver: req.user._id, status: "accepted" }
       ]
-    }).populate("sender", "firstName lastName email")
-      .populate("receiver", "firstName lastName email");
+    }).populate("sender", "firstName lastName email avatar")
+      .populate("receiver", "firstName lastName email avatar");
     const friends = friendRequest.map(req => {
       return req.sender._id.toString() === userId.toString()
         ? req.receiver
