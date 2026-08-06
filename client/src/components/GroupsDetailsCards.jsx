@@ -1,7 +1,7 @@
-import { getInitials, avatarColors } from "../utils/avatar"
+import { getInitials, avatarColors } from "../utils/avatar";
 import { Link } from "react-router-dom";
 
-export default function GroupDetailsCards({ groups = []}) {
+export default function GroupDetailsCards({ groups = [] }) {
   return (
     <>
       {groups?.map((group, index) => {
@@ -13,15 +13,25 @@ export default function GroupDetailsCards({ groups = []}) {
             className="bg-white rounded-xl border border-gray-200 hover:shadow-md p-5 flex flex-col gap-4 transition"
           >
             <div className="flex items-start justify-between">
-              <div className={`w-10 h-10 rounded-lg ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-white text-sm font-bold`}>
+              <div
+                className={`w-10 h-10 rounded-lg ${
+                  avatarColors[index % avatarColors.length]
+                } flex items-center justify-center text-white text-sm font-bold`}
+              >
                 {getInitials(group.name)}
               </div>
               {group.userBalance > 0 ? (
-                <span className="text-sm font-semibold text-emerald-500">+₹{group.userBalance.toFixed(2)}</span>
+                <span className="text-sm font-semibold text-emerald-500">
+                  +₹{group.userBalance.toFixed(2)}
+                </span>
               ) : group.userBalance < 0 ? (
-                <span className="text-sm font-semibold text-red-500">-₹{Math.abs(group.userBalance).toFixed(2)}</span>
+                <span className="text-sm font-semibold text-red-500">
+                  -₹{Math.abs(group.userBalance).toFixed(2)}
+                </span>
               ) : (
-                <span className="text-sm font-semibold text-gray-400">₹0.00</span>
+                <span className="text-sm font-semibold text-gray-400">
+                  ₹0.00
+                </span>
               )}
             </div>
             <div>
@@ -36,9 +46,19 @@ export default function GroupDetailsCards({ groups = []}) {
                 <div
                   key={member._id}
                   title={`${member.firstName} ${member.lastName}`}
-                  className={`w-7 h-7 rounded-full ${avatarColors[i % avatarColors.length]} border-2 border-white flex items-center justify-center text-white text-xs font-medium`}
+                  className={`w-7 h-7 rounded-full ${
+                    avatarColors[i % avatarColors.length]
+                  } border-2 border-white flex items-center justify-center text-white text-xs font-medium`}
                 >
-                  {getInitials(member.firstName, member.lastName)}
+                  {member?.avatar ? (
+                    <img
+                      src={member.avatar}
+                      alt="Avatar"
+                      className="w-full h-full object-cover rounded-full bg-gray-200"
+                    />
+                  ) : (
+                    getInitials(member?.firstName, member?.lastName)
+                  )}
                 </div>
               ))}
               {memberCount > 3 && (
@@ -48,8 +68,8 @@ export default function GroupDetailsCards({ groups = []}) {
               )}
             </div>
           </Link>
-        )
+        );
       })}
     </>
-  )
+  );
 }

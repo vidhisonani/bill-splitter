@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MdPerson,
@@ -9,6 +9,7 @@ import {
   MdManageAccounts,
   MdCheckCircle,
   MdError,
+  MdOutlineFileUpload,
 } from "react-icons/md";
 import {
   HiOutlineArrowRightOnRectangle,
@@ -26,6 +27,7 @@ import {
   validatePassword,
   validateConfirmPassword,
 } from "../utils/validation";
+import toast from 'react-hot-toast';
 
 export default function Settings() {
   useDocumentTitle("Settings | SplitEase");
@@ -46,6 +48,24 @@ export default function Settings() {
   const [profileError, setProfileError] = useState("");
   const [profileLoading, setProfileLoading] = useState(false);
   const [profErrors, setProfErrors] = useState({});
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatar || null);
+
+  useEffect(() => {
+    if (user?.avatar) setAvatarPreview(user.avatar);
+  }, [user?.avatar]);
+
+  useEffect(() => {
+    return () => {
+      if (
+        avatarPreview &&
+        avatarPreview.startsWith &&
+        avatarPreview.startsWith("blob:")
+      ) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -108,12 +128,12 @@ export default function Settings() {
     try {
       const response = await api.put("/auth/profile", {
         firstName: profileForm.firstName.trim(),
-        lastName: profileForm.lastName.trim()
+        lastName: profileForm.lastName.trim(),
       });
       updateUser(response.data.user);
       setProfileForm({
         firstName: response.data.user.firstName,
-        lastName: response.data.user.lastName
+        lastName: response.data.user.lastName,
       });
       setProfErrors({});
       setProfileSuccess("Profile updated successfully!");
@@ -199,6 +219,33 @@ export default function Settings() {
     }
   };
 
+  // avatar upload handler
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+      const res = await api.put("/auth/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res.data?.user) updateUser(res.data.user);
+      toast.success("Avatar uploaded successfully!");
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to upload avatar. Please try again."
+      );
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
+
+  const avatarSrc = avatarPreview || user?.avatar || null;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -220,8 +267,60 @@ export default function Settings() {
             </div>
 
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl font-bold select-none">
-                {getInitials(user?.firstName, user?.lastName)}
+              <div className="relative">
+                <div className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl md:text-2xl font-bold select-none overflow-hidden">
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    getInitials(user?.firstName, user?.lastName)
+                  )}
+                </div>
+
+                <input
+                  id="avatarUpload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+
+                <label
+                  htmlFor="avatarUpload"
+                  title="Upload avatar"
+                  className="absolute -bottom-1 -right-1 bg-white border border-gray-200 rounded-full p-1 shadow-sm cursor-pointer hover:bg-indigo-50 transition flex items-center justify-center w-8 h-8 md:w-9 md:h-9"
+                >
+                  {avatarLoading ? (
+                    <svg
+                      className="animate-spin w-4 h-4 text-indigo-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        className="opacity-25"
+                      />
+                      <path
+                        d="M4 12a8 8 0 018-8"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        className="opacity-75"
+                      />
+                    </svg>
+                  ) : (
+                    <MdOutlineFileUpload
+                      size={18}
+                      className="text-indigo-600"
+                    />
+                  )}
+                </label>
               </div>
               <div>
                 <p className="font-semibold text-gray-900">
@@ -269,10 +368,11 @@ export default function Settings() {
                     required
                     placeholder="Vidhi"
                     autoComplete="given-name"
-                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${profErrors.firstName
-                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                      }`}
+                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
+                      profErrors.firstName
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                    }`}
                   />
                 </div>
                 {profErrors.firstName && (
@@ -311,10 +411,11 @@ export default function Settings() {
                     required
                     placeholder="Patel"
                     autoComplete="family-name"
-                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${profErrors.lastName
-                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                      }`}
+                    className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
+                      profErrors.lastName
+                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                    }`}
                   />
                 </div>
                 {profErrors.lastName && (
@@ -337,7 +438,9 @@ export default function Settings() {
                 <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 md:text-md cursor-not-allowed">
                   <MdEmail size={18} className="text-gray-400" />
                   {user?.email}
-                  <span className="ml-auto"><MdLock size={18} className="text-gray-600" /></span>
+                  <span className="ml-auto">
+                    <MdLock size={18} className="text-gray-600" />
+                  </span>
                 </div>
               </div>
 
@@ -400,10 +503,11 @@ export default function Settings() {
                       minLength={6}
                       placeholder="Current password"
                       autoComplete="current-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.currentPassword
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                        }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
+                        passErrors.currentPassword
+                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      }`}
                     />
                     <CurrentEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"
@@ -449,10 +553,11 @@ export default function Settings() {
                       minLength={6}
                       placeholder="At least 6 characters"
                       autoComplete="new-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.newPassword
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                        }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
+                        passErrors.newPassword
+                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      }`}
                     />
                     <NewEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"
@@ -498,10 +603,11 @@ export default function Settings() {
                       minLength={6}
                       placeholder="Re-enter new password"
                       autoComplete="new-password"
-                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${passErrors.confirmPassword
-                        ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                        }`}
+                      className={`w-full pl-9 pr-3.5 py-2.5 rounded-lg border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition ${
+                        passErrors.confirmPassword
+                          ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                      }`}
                     />
                     <ConfirmEye
                       className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-900 hover:text-gray-700"

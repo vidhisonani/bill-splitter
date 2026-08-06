@@ -1,6 +1,9 @@
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 const { check, validationResult } = require("express-validator");
+const cloudinary = require("../cloudinary/cloudinary");
+const fs = require("fs");
+const path = require("path");
 
 exports.register = [
   check('email')
@@ -166,3 +169,29 @@ exports.changePassword = [
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }]
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const filePath = path.resolve(req.file.path);
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "split-ease/avatars",
+      transformation: [{ width: 500, height: 500, crop: "thumb", gravity: "face" }],
+      quality: "auto",
+    });
+
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("Failed to remove temp file", err);
+    });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.avatar = result.secure_url || result.url;
+    await user.save();
+    return res.status(200).json({ message: "Avatar uploaded", user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, avatar: user.avatar } });
+  } catch (err) {
+    console.error("Error uploading avatar", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

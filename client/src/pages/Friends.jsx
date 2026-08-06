@@ -1,13 +1,19 @@
-import { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import { useAuth } from '../context/AuthContext';
-import api from '../api';
-import { HiOutlineArrowUpRight, HiOutlineArrowDownLeft, HiOutlinePlus, HiOutlineCheck, HiOutlineExclamationTriangle } from 'react-icons/hi2';
-import { MdError } from 'react-icons/md';
-import toast from 'react-hot-toast';
-import useDocumentTitle from '../hooks/useDocumentTitle';
-import FriendsSkeleton from '../components/skeletons/FriendsSkeleton';
-import { getInitials } from '../utils/avatar';
+import { useEffect, useState } from "react";
+import Sidebar from "../components/Sidebar";
+import { useAuth } from "../context/AuthContext";
+import api from "../api";
+import {
+  HiOutlineArrowUpRight,
+  HiOutlineArrowDownLeft,
+  HiOutlinePlus,
+  HiOutlineCheck,
+  HiOutlineExclamationTriangle,
+} from "react-icons/hi2";
+import { MdError } from "react-icons/md";
+import toast from "react-hot-toast";
+import useDocumentTitle from "../hooks/useDocumentTitle";
+import FriendsSkeleton from "../components/skeletons/FriendsSkeleton";
+import { getInitials } from "../utils/avatar";
 
 export default function Friends() {
   useDocumentTitle("Friends | SplitEase");
@@ -31,7 +37,7 @@ export default function Friends() {
         const [balancesRes, requestsRes, sentRes] = await Promise.all([
           api.get("/friends/balances"),
           api.get("/friends/requests"),
-          api.get("/friends/requests/sent")
+          api.get("/friends/requests/sent"),
         ]);
         setBalances(balancesRes.data.balances || []);
         setRequests(requestsRes.data || []);
@@ -56,7 +62,7 @@ export default function Friends() {
     try {
       await api.post("/friends/request", {
         receiverEmail: form.email.trim(),
-        message: form.message.trim()
+        message: form.message.trim(),
       });
       setRequestSent(true);
       setForm({ email: "", message: "" });
@@ -72,7 +78,7 @@ export default function Friends() {
   const handleRespond = async (requestId, status) => {
     try {
       await api.put(`/friends/requests/${requestId}`, { status });
-      setRequests(prev => prev.filter(r => r._id !== requestId));
+      setRequests((prev) => prev.filter((r) => r._id !== requestId));
       if (status === "accepted") {
         const res = await api.get("/friends/balances");
         setBalances(res.data.balances || []);
@@ -86,14 +92,14 @@ export default function Friends() {
   const handleCancelRequest = async (requestId) => {
     try {
       await api.delete(`/friends/requests/${requestId}`);
-      setSentRequests(prev => prev.filter(r => r._id !== requestId));
+      setSentRequests((prev) => prev.filter((r) => r._id !== requestId));
       toast.success("Request cancelled successfully.");
     } catch (err) {
       toast.error("Failed to cancel request.");
     }
   };
 
-  if (loading) return <FriendsSkeleton />
+  if (loading) return <FriendsSkeleton />;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -110,8 +116,9 @@ export default function Friends() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer">
-            <HiOutlinePlus className="w-5 h-5" strokeWidth='3px' />
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition cursor-pointer"
+          >
+            <HiOutlinePlus className="w-5 h-5" strokeWidth="3px" />
             Add Friend
           </button>
         </div>
@@ -126,9 +133,17 @@ export default function Friends() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total owed to you</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Total owed to you
+              </p>
               <p className="text-2xl font-bold text-emerald-500">
-                +₹{balances.reduce((sum, b) => b.netBalance > 0 ? sum + b.netBalance : sum, 0).toFixed(2)}
+                +₹
+                {balances
+                  .reduce(
+                    (sum, b) => (b.netBalance > 0 ? sum + b.netBalance : sum),
+                    0
+                  )
+                  .toFixed(2)}
               </p>
             </div>
             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500">
@@ -137,9 +152,18 @@ export default function Friends() {
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total you owe</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                Total you owe
+              </p>
               <p className="text-2xl font-bold text-red-500">
-                -₹{balances.reduce((sum, b) => b.netBalance < 0 ? sum + Math.abs(b.netBalance) : sum, 0).toFixed(2)}
+                -₹
+                {balances
+                  .reduce(
+                    (sum, b) =>
+                      b.netBalance < 0 ? sum + Math.abs(b.netBalance) : sum,
+                    0
+                  )
+                  .toFixed(2)}
               </p>
             </div>
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500">
@@ -148,18 +172,22 @@ export default function Friends() {
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-3">Friend Requests</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-3">
+            Friend Requests
+          </h2>
           <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
             {/* Tab headers */}
             <div className="flex gap-4 border-b border-gray-200 mb-4">
               <button
                 onClick={() => setRequestTab("received")}
-                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${requestTab === "received"
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${
+                  requestTab === "received"
+                    ? "border-indigo-600 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
               >
-                Received {requests.length > 0 && (
+                Received{" "}
+                {requests.length > 0 && (
                   <span className="ml-1.5 bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-full">
                     {requests.length}
                   </span>
@@ -167,12 +195,14 @@ export default function Friends() {
               </button>
               <button
                 onClick={() => setRequestTab("sent")}
-                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${requestTab === "sent"
-                  ? "border-indigo-600 text-indigo-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`pb-2.5 text-sm font-medium border-b-2 transition cursor-pointer ${
+                  requestTab === "sent"
+                    ? "border-indigo-600 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
               >
-                Sent {sentRequests.length > 0 && (
+                Sent{" "}
+                {sentRequests.length > 0 && (
                   <span className="ml-1.5 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded-full">
                     {sentRequests.length}
                   </span>
@@ -181,20 +211,29 @@ export default function Friends() {
             </div>
 
             {/* Received tab */}
-            {requestTab === "received" && (
-              requests.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">No pending requests</p>
+            {requestTab === "received" &&
+              (requests.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">
+                  No pending requests
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {requests.map(req => (
-                    <div key={req._id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-100">
+                  {requests.map((req) => (
+                    <div
+                      key={req._id}
+                      className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-100"
+                    >
                       <div>
                         <p className="text-sm font-medium text-gray-900">
                           {req.sender.firstName} {req.sender.lastName}
                         </p>
-                        <p className="text-xs text-gray-400">{req.sender.email}</p>
+                        <p className="text-xs text-gray-400">
+                          {req.sender.email}
+                        </p>
                         {req.message && (
-                          <p className="text-xs text-gray-500 mt-0.5 italic">"{req.message}"</p>
+                          <p className="text-xs text-gray-500 mt-0.5 italic">
+                            "{req.message}"
+                          </p>
                         )}
                       </div>
                       <div className="flex gap-2">
@@ -214,24 +253,32 @@ export default function Friends() {
                     </div>
                   ))}
                 </div>
-              )
-            )}
+              ))}
 
             {/* Sent tab */}
-            {requestTab === "sent" && (
-              sentRequests.length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">No pending sent requests</p>
+            {requestTab === "sent" &&
+              (sentRequests.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">
+                  No pending sent requests
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {sentRequests.map(req => (
-                    <div key={req._id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-100">
+                  {sentRequests.map((req) => (
+                    <div
+                      key={req._id}
+                      className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-100"
+                    >
                       <div>
                         <p className="text-sm font-medium text-gray-900">
                           {req.receiver.firstName} {req.receiver.lastName}
                         </p>
-                        <p className="text-xs text-gray-400">{req.receiver.email}</p>
+                        <p className="text-xs text-gray-400">
+                          {req.receiver.email}
+                        </p>
                         {req.message && (
-                          <p className="text-xs text-gray-500 mt-0.5 italic">"{req.message}"</p>
+                          <p className="text-xs text-gray-500 mt-0.5 italic">
+                            "{req.message}"
+                          </p>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
@@ -248,8 +295,7 @@ export default function Friends() {
                     </div>
                   ))}
                 </div>
-              )
-            )}
+              ))}
           </div>
         </div>
         {/* Friends list */}
@@ -260,7 +306,9 @@ export default function Friends() {
           {balances.length === 0 ? (
             <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
               <p className="text-gray-500 font-medium">No friends yet</p>
-              <p className="text-sm text-gray-400 mt-1">Add a friend to start splitting expenses together</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Add a friend to start splitting expenses together
+              </p>
               <button
                 onClick={() => setShowModal(true)}
                 className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition cursor-pointer"
@@ -271,11 +319,22 @@ export default function Friends() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {balances.map(({ friend, netBalance }) => (
-                <div key={friend._id} className="bg-white rounded-xl border border-gray-200 p-5">
+                <div
+                  key={friend._id}
+                  className="bg-white rounded-xl border border-gray-200 p-5"
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
-                        {getInitials(friend.firstName, friend.lastName)}
+                        {friend?.avatar ? (
+                          <img
+                            src={friend.avatar}
+                            alt="Avatar"
+                            className="w-full h-full object-cover rounded-full bg-gray-200"
+                          />
+                        ) : (
+                          getInitials(friend?.firstName, friend?.lastName)
+                        )}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
@@ -287,16 +346,26 @@ export default function Friends() {
                     <div className="text-right">
                       {netBalance > 0 ? (
                         <div>
-                          <p className="text-xs text-emerald-500 font-medium uppercase tracking-wide">Owes you</p>
-                          <p className="text-sm font-bold text-emerald-500">₹{netBalance.toFixed(2)}</p>
+                          <p className="text-xs text-emerald-500 font-medium uppercase tracking-wide">
+                            Owes you
+                          </p>
+                          <p className="text-sm font-bold text-emerald-500">
+                            ₹{netBalance.toFixed(2)}
+                          </p>
                         </div>
                       ) : netBalance < 0 ? (
                         <div>
-                          <p className="text-xs text-red-500 font-medium uppercase tracking-wide">You owe</p>
-                          <p className="text-sm font-bold text-red-500">₹{Math.abs(netBalance).toFixed(2)}</p>
+                          <p className="text-xs text-red-500 font-medium uppercase tracking-wide">
+                            You owe
+                          </p>
+                          <p className="text-sm font-bold text-red-500">
+                            ₹{Math.abs(netBalance).toFixed(2)}
+                          </p>
                         </div>
                       ) : (
-                        <p className="text-sm font-medium text-gray-400">Settled up</p>
+                        <p className="text-sm font-medium text-gray-400">
+                          Settled up
+                        </p>
                       )}
                     </div>
                   </div>
@@ -309,26 +378,40 @@ export default function Friends() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Add your friends</h2>
-            <p className="text-sm text-gray-500 mb-5">Enter your friend's email to add them to your friend list.</p>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">
+              Add your friends
+            </h2>
+            <p className="text-sm text-gray-500 mb-5">
+              Enter your friend's email to add them to your friend list.
+            </p>
             {requestSent ? (
               <div className="text-center py-6">
                 <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
-                  <HiOutlineCheck className="w-5 h-5 text-green-600" strokeWidth='2px' />
+                  <HiOutlineCheck
+                    className="w-5 h-5 text-green-600"
+                    strokeWidth="2px"
+                  />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Request Sent!</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  Request Sent!
+                </h3>
                 <p className="text-sm text-gray-500 mb-5">
                   They'll appear in your friends list once they accept.
                 </p>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => { setRequestSent(false); }}
+                    onClick={() => {
+                      setRequestSent(false);
+                    }}
                     className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition cursor-pointer"
                   >
                     Send Another
                   </button>
                   <button
-                    onClick={() => { setShowModal(false); setRequestSent(false); }}
+                    onClick={() => {
+                      setShowModal(false);
+                      setRequestSent(false);
+                    }}
                     className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition cursor-pointer"
                   >
                     Done
@@ -363,13 +446,18 @@ export default function Friends() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Message <span className="text-gray-400 font-normal">(optional)</span>
+                    Message{" "}
+                    <span className="text-gray-400 font-normal">
+                      (optional)
+                    </span>
                   </label>
                   <input
                     type="text"
                     disabled={formLoading}
                     value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, message: e.target.value })
+                    }
                     placeholder="e.g. March trip expenses"
                     className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                   />
@@ -401,5 +489,5 @@ export default function Friends() {
         </div>
       )}
     </div>
-  )
+  );
 }

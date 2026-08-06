@@ -33,8 +33,8 @@ exports.createGroup = [
 exports.getMyGroups = async (req, res) => {
   try {
     const groups = await Group.find({ members: req.user._id })
-      .populate("members", "firstName lastName email")
-      .populate("createdBy", "firstName lastName email");
+      .populate("members", "firstName lastName email avatar")
+      .populate("createdBy", "firstName lastName email avatar");
     const groupsWithBalances = [];
 
     for (let group of groups) {
@@ -91,8 +91,8 @@ exports.getGroupById = async (req, res) => {
     }
     const groupId = req.params.id;
     const group = await Group.findById(groupId)
-      .populate("members", "firstName lastName email")
-      .populate("createdBy", "firstName lastName email");
+      .populate("members", "firstName lastName email avatar")
+      .populate("createdBy", "firstName lastName email avatar");
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
