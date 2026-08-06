@@ -436,7 +436,18 @@ export default function GroupDetail() {
                               <div
                                 className={`w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white text-xs font-semibold`}
                               >
-                                {getInitials(member.firstName, member.lastName)}
+                                {member?.avatar ? (
+                                  <img
+                                    src={member.avatar}
+                                    alt="Avatar"
+                                    className="w-full h-full object-cover rounded-full bg-gray-200"
+                                  />
+                                ) : (
+                                  getInitials(
+                                    member?.firstName,
+                                    member?.lastName
+                                  )
+                                )}
                               </div>
                               <div>
                                 <h4 className="font-semibold text-gray-900 text-sm">

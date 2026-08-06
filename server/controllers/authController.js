@@ -80,7 +80,7 @@ exports.login = [
         return res.status(401).json({ message: "Invalid email or password" });
       }
       const token = generateToken(user._id);
-      return res.status(200).json({ message: "User Logged In", _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, token });
+      return res.status(200).json({ message: "User Logged In", _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, avatar: user.avatar, token });
     } catch (err) {
       console.log("Error while Log in ", err);
       return res.status(500).json({ message: "Internal Server Error" });

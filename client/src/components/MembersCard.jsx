@@ -1,5 +1,5 @@
-import { getInitials, avatarColors } from "../utils/avatar"
-import {useAuth} from '../context/AuthContext'
+import { getInitials, avatarColors } from "../utils/avatar";
+import { useAuth } from "../context/AuthContext";
 
 export default function MembersCard({ members = [] }) {
   // members detail on GroupDetail page
@@ -14,20 +14,26 @@ export default function MembersCard({ members = [] }) {
       <div className="space-y-3">
         {members.map((member, i) => (
           <div key={member._id} className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-white text-xs font-medium`}>
+            <div
+              className={`w-8 h-8 rounded-full ${
+                avatarColors[i % avatarColors.length]
+              } flex items-center justify-center text-white text-xs font-medium`}
+            >
               {member?.avatar ? (
-                    <img
-                      src={member.avatar}
-                      alt="Avatar"
-                      className="w-full h-full object-cover rounded-full bg-gray-200"
-                    />
-                  ) : (
-                    getInitials(member?.firstName, member?.lastName)
-                  )}
+                <img
+                  src={member.avatar}
+                  alt="Avatar"
+                  className="w-full h-full object-cover rounded-full bg-gray-200"
+                />
+              ) : (
+                getInitials(member?.firstName, member?.lastName)
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {member._id === user._id ? "You" : member.firstName + " " + member.lastName}
+                {member._id === user._id
+                  ? "You"
+                  : member.firstName + " " + member.lastName}
               </p>
               <p className="text-xs text-gray-400">{member.email}</p>
             </div>
@@ -35,5 +41,5 @@ export default function MembersCard({ members = [] }) {
         ))}
       </div>
     </div>
-  )
+  );
 }

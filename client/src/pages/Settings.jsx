@@ -27,7 +27,7 @@ import {
   validatePassword,
   validateConfirmPassword,
 } from "../utils/validation";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 export default function Settings() {
   useDocumentTitle("Settings | SplitEase");
@@ -237,7 +237,8 @@ export default function Settings() {
       toast.success("Avatar uploaded successfully!");
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to upload avatar. Please try again."
+        err.response?.data?.message ||
+          "Failed to upload avatar. Please try again."
       );
     } finally {
       setAvatarLoading(false);

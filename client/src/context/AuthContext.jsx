@@ -3,7 +3,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
+  const [token, setToken] = useState(
+    () => localStorage.getItem("token") || null
+  );
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem("user");
@@ -33,10 +35,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
   };
-  
-  const updateUser = (updatedUser) => {
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+  const updateUser = (updatedFields) => {
+    setUser((prev) => {
+      const merged = { ...prev, ...updatedFields };
+      localStorage.setItem("user", JSON.stringify(merged));
+      return merged;
+    });
   };
 
   if (!authReady) return null;

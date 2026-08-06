@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
-  HiOutlineSquares2X2, HiOutlineUsers, HiOutlineCurrencyRupee,
-  HiOutlineCog6Tooth, HiOutlineArrowRightOnRectangle, HiOutlineUserGroup
-} from 'react-icons/hi2';
-import { getInitials } from '../utils/avatar';
+  HiOutlineSquares2X2,
+  HiOutlineUsers,
+  HiOutlineCurrencyRupee,
+  HiOutlineCog6Tooth,
+  HiOutlineArrowRightOnRectangle,
+  HiOutlineUserGroup,
+} from "react-icons/hi2";
+import { getInitials } from "../utils/avatar";
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
@@ -45,16 +49,28 @@ export default function Sidebar() {
     <>
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-40 flex items-center justify-between px-4">
         <div className="flex flex-col">
-          <span className="text-indigo-600 font-extrabold text-lg tracking-tight">SplitEase</span>
-          <span className="text-[10px] text-gray-400 -mt-1">Expense Splitter</span>
+          <span className="text-indigo-600 font-extrabold text-lg tracking-tight">
+            SplitEase
+          </span>
+          <span className="text-[10px] text-gray-400 -mt-1">
+            Expense Splitter
+          </span>
         </div>
-        
+
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
             className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm font-bold border-2 border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition cursor-pointer select-none"
           >
-            {getInitials(user?.firstName, user?.lastName)}
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt="Avatar"
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              getInitials(user?.firstName, user?.lastName)
+            )}
           </button>
 
           {showDropdown && (
@@ -65,17 +81,18 @@ export default function Sidebar() {
                 </p>
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
-              
+
               <div className="py-1">
                 <Link
                   to="/settings"
                   onClick={() => setShowDropdown(false)}
                   className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                 >
-                  <HiOutlineCog6Tooth className="w-4 h-4 text-gray-400" /> Account Settings
+                  <HiOutlineCog6Tooth className="w-4 h-4 text-gray-400" />{" "}
+                  Account Settings
                 </Link>
               </div>
-              
+
               <div className="border-t border-gray-100 pt-1">
                 <button
                   onClick={() => {
@@ -101,21 +118,30 @@ export default function Sidebar() {
 
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map(({ to, icon: Icon, label }) => {
-            const isActive = location.pathname === to ||
+            const isActive =
+              location.pathname === to ||
               (to === "/groups" && location.pathname.startsWith("/groups/"));
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all relative overflow-hidden group ${isActive
-                  ? "bg-indigo-50 text-indigo-600 font-semibold"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all relative overflow-hidden group ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-600 font-semibold"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
               >
                 {isActive && (
                   <span className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-r" />
                 )}
-                <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? "scale-105 text-indigo-600" : "text-gray-400 group-hover:text-gray-600"}`} /> {label}
+                <Icon
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    isActive
+                      ? "scale-105 text-indigo-600"
+                      : "text-gray-400 group-hover:text-gray-600"
+                  }`}
+                />{" "}
+                {label}
               </Link>
             );
           })}
@@ -125,7 +151,11 @@ export default function Sidebar() {
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold">
               {user?.avatar ? (
-                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                <img
+                  src={user.avatar}
+                  alt="Avatar"
+                  className="w-full h-full object-cover rounded-full"
+                />
               ) : (
                 getInitials(user?.firstName, user?.lastName)
               )}
@@ -139,7 +169,8 @@ export default function Sidebar() {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-500 text-sm transition cursor-pointer select-none">
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-500 text-sm transition cursor-pointer select-none"
+          >
             <HiOutlineArrowRightOnRectangle className="w-5 h-5" /> Logout
           </button>
         </div>
@@ -152,16 +183,24 @@ export default function Sidebar() {
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-1 py-1 px-3 transition-all relative ${isActive(to)
-                ? "text-indigo-600 font-semibold"
-                : "text-gray-400 hover:text-gray-600"
-                }`}
+              className={`flex flex-col items-center gap-1 py-1 px-3 transition-all relative ${
+                isActive(to)
+                  ? "text-indigo-600 font-semibold"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
             >
-              <div className={`p-1.5 rounded-xl transition-all ${isActive(to)
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-gray-400"
-                }`}>
-                <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive(to) ? "scale-110 stroke-2" : ""}`} />
+              <div
+                className={`p-1.5 rounded-xl transition-all ${
+                  isActive(to)
+                    ? "bg-indigo-50 text-indigo-600"
+                    : "text-gray-400"
+                }`}
+              >
+                <Icon
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    isActive(to) ? "scale-110 stroke-2" : ""
+                  }`}
+                />
               </div>
               <span className="text-[10px] tracking-wide">{label}</span>
               {isActive(to) && (
