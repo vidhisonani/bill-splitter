@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { HiOutlineLockClosed, HiOutlineXCircle } from "react-icons/hi2";
 import api from "../api";
-import LoadingScreen from "./LoadingScreen";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import DeleteExpenseModal from "./DeleteExpenseModal";
@@ -20,6 +19,7 @@ export default function ExpenseDetailCard({
 
   const fetchExpenses = async () => {
     setLoading(true);
+    setExpense(null);
     try {
       const res = await api.get(`/expenses/${expenseId}`);
       setExpense(res.data.expense);
@@ -39,7 +39,7 @@ export default function ExpenseDetailCard({
       toast.error(error);
       onClose();
     }
-  }, [error]);
+  }, [error, onClose]);
 
   useEffect(() => {
     if (expenseId) {
@@ -48,9 +48,22 @@ export default function ExpenseDetailCard({
   }, [expenseId]);
 
   useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyPaddingRight = document.body.style.paddingRight;
+    const scrollBarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    if (scrollBarWidth > 0) {
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    }
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.paddingRight = previousBodyPaddingRight;
     };
   }, []);
 
@@ -63,8 +76,6 @@ export default function ExpenseDetailCard({
           s?.createdAt && new Date(s.createdAt) >= new Date(expense.createdAt)
       )
     : false;
-
-  if (loading) return <LoadingScreen />;
 
   if (error) return null;
   return (
@@ -85,7 +96,13 @@ export default function ExpenseDetailCard({
             <HiOutlineXCircle className="w-7 h-7" />
           </button>
         </div>
-        {expense && (
+        {loading && (
+          <div className="p-10 flex flex-col items-center justify-center gap-3">
+            <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+            <p className="text-sm text-gray-500">Loading expense...</p>
+          </div>
+        )}
+        {!loading && expense && (
           <div className="p-6">
             <div className="mb-8 text-center">
               <h3 className="mt-1 text-2xl font-bold text-indigo-600 break-words">

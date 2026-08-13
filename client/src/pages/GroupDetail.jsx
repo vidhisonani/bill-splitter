@@ -27,7 +27,7 @@ export default function GroupDetail() {
   const [activeTab, setActiveTab] = useState("expenses");
   const [expenses, setExpenses] = useState([]);
   const [showExpenseCard, setShowExpenseCard] = useState(false);
-  const [expenseId, setExpenseId] = useState(false);
+  const [expenseId, setExpenseId] = useState(null);
   const [settlingUp, setSettlingUp] = useState(false);
   const [settlements, setSettlements] = useState([]);
 
@@ -289,6 +289,7 @@ export default function GroupDetail() {
             <AddMemberCard
               id={group._id}
               fetchGroupAndExpenses={fetchGroupAndExpenses}
+              groupMembers={group.members}
             />
             {/* Delete Group */}
             <DeleteGroupModal groupId={group._id} group={group} />
@@ -351,8 +352,8 @@ export default function GroupDetail() {
                             key={expense._id}
                             className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition cursor-pointer"
                             onClick={() => {
-                              setShowExpenseCard(true),
-                                setExpenseId(expense._id);
+                              setExpenseId(expense._id);
+                              setShowExpenseCard(true);
                             }}
                           >
                             <div className="flex items-center gap-3">
@@ -408,7 +409,10 @@ export default function GroupDetail() {
                       {showExpenseCard && (
                         <ExpenseDetailCard
                           expenseId={expenseId}
-                          onClose={() => setShowExpenseCard(false)}
+                          onClose={() => {
+                            setShowExpenseCard(false);
+                            setExpenseId(null);
+                          }}
                           refreshExpenses={fetchGroupAndExpenses}
                           settlements={settlements}
                         />

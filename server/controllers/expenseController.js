@@ -67,9 +67,9 @@ exports.getGroupExpenses = async (req, res) => {
       return res.status(403).json({ message: "You are not a member of this group" });
     }
     const expenses = await Expense.find({ group: groupId })
-      .populate("paidBy", "firstName lastName email")
-      .populate("splitAmong", "firstName lastName email")
-      .populate("createdBy", "firstName lastName email")
+      .populate("paidBy", "firstName lastName email avatar")
+      .populate("splitAmong", "firstName lastName email avatar")
+      .populate("createdBy", "firstName lastName email avatar")
       .sort({ createdAt: -1 });;
     return res.status(200).json({ message: "Expenses fetched successfully", expenses });
   } catch (err) {
@@ -111,13 +111,12 @@ exports.getMyExpenses = async (req, res) => {
     const expenses = await Expense.find({
       $or: [{ paidBy: req.user._id }, { splitAmong: req.user._id }]
     })
-      .populate("paidBy", "firstName lastName email")
-      .populate("splitAmong", "firstName lastName email")
+      .populate("paidBy", "firstName lastName email avatar")
+      .populate("splitAmong", "firstName lastName email avatar")
       .populate("group", "name")
       .sort({ createdAt: -1 });
     return res.status(200).json({ message: "Expenses fetched successfully", expenses });
   } catch (err) {
-    console.log("Error while fetching my expense", err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -128,9 +127,9 @@ exports.getExpenseById = async (req, res) => {
       return res.status(400).json({ message: "Invalid expense id" });
     }
     const expense = await Expense.findById(req.params.id)
-      .populate("createdBy", "firstName lastName")
-      .populate("paidBy", "firstName lastName email")
-      .populate("splitAmong", "firstName lastName email");
+      .populate("createdBy", "firstName lastName avatar")
+      .populate("paidBy", "firstName lastName email avatar")
+      .populate("splitAmong", "firstName lastName email avatar");
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }

@@ -1,10 +1,10 @@
 import Sidebar from "../components/Sidebar";
 import { HiOutlineExclamationTriangle } from "react-icons/hi2";
 import { useState, useCallback } from "react";
-import CreateGroupModal from '../components/CreateGroupModal';
+import CreateGroupModal from "../components/CreateGroupModal";
 import CreateGroupCard from "../components/CreateGroupCard";
-import useGroups from '../hooks/useGroups';
-import GroupDetailsCards from '../components/GroupsDetailsCards';
+import useGroups from "../hooks/useGroups";
+import GroupDetailsCards from "../components/GroupsDetailsCards";
 import useDocumentTitle from "../hooks/useDocumentTitle";
 import GroupSkeleton from "../components/skeletons/GroupsSkeleton";
 
@@ -14,11 +14,14 @@ export default function Groups() {
   const { groups, setGroups, loading, error } = useGroups();
   const [showModal, setShowModal] = useState(false);
 
-  const handleGroupCreated = useCallback((group) => {
-    setGroups(prev => [...prev, group]);
-  }, [setGroups]);
+  const handleGroupCreated = useCallback(
+    (group) => {
+      setGroups((prev) => [group, ...prev.filter((g) => g._id !== group._id)]);
+    },
+    [setGroups]
+  );
 
-  if (loading) return <GroupSkeleton />
+  if (loading) return <GroupSkeleton />;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -26,9 +29,7 @@ export default function Groups() {
       <main className="md:ml-56 flex-1 px-4 md:px-8 pt-24 pb-24 md:py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              All Groups
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900">All Groups</h1>
             <p className="text-sm text-gray-500 mt-0.5">
               All your groups in one place.
             </p>
@@ -44,11 +45,15 @@ export default function Groups() {
           {/* Create new group card */}
           <CreateGroupCard onClick={() => setShowModal(true)} />
           {/* Create Group Modal */}
-          <CreateGroupModal show={showModal} onClose={() => setShowModal(false)} onGroupCreated={handleGroupCreated} />
+          <CreateGroupModal
+            show={showModal}
+            onClose={() => setShowModal(false)}
+            onGroupCreated={handleGroupCreated}
+          />
           {/* groups cards */}
           <GroupDetailsCards groups={groups} />
         </div>
       </main>
     </div>
   );
-}   
+}

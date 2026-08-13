@@ -20,8 +20,8 @@ exports.createGroup = [
       const { name, description } = req.body;
       const group = await Group.create({ name, description, createdBy: req.user._id, members: [req.user._id] });
       const populatedGroup = await Group.findById(group._id)
-        .populate("members", "firstName lastName email")
-        .populate("createdBy", "firstName lastName email");
+        .populate("members", "firstName lastName email avatar")
+        .populate("createdBy", "firstName lastName email avatar");
       const groupObj = populatedGroup.toObject();
       groupObj.userBalance = 0;
       return res.status(201).json({ message: "Group Created", group: groupObj });
@@ -154,8 +154,8 @@ exports.addMember = [
       group.members.push(member._id);
       await group.save();
       const updatedGroup = await Group.findById(group._id)
-        .populate("members", "firstName lastName email")
-        .populate("createdBy", "firstName lastName email");
+        .populate("members", "firstName lastName email avatar")
+        .populate("createdBy", "firstName lastName email avatar");
       return res.status(200).json({ message: "Member added successfully", group: updatedGroup });
     } catch (err) {
       return res.status(500).json({ message: "Internal Server Error" })

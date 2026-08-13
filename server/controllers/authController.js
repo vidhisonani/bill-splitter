@@ -49,7 +49,6 @@ exports.register = [
       const token = generateToken(user._id);
       return res.status(201).json({ message: "User Created", _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, token });
     } catch (err) {
-      console.log("Something went wrong while registering process ", err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }]
@@ -82,7 +81,6 @@ exports.login = [
       const token = generateToken(user._id);
       return res.status(200).json({ message: "User Logged In", _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, avatar: user.avatar, token });
     } catch (err) {
-      console.log("Error while Log in ", err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }]
@@ -91,7 +89,6 @@ exports.getMe = async (req, res) => {
   try {
     return res.status(200).json(req.user);
   } catch (err) {
-    console.log("Error in getMe", err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
@@ -130,7 +127,6 @@ exports.updateProfile = [
         }
       });
     } catch (err) {
-      console.log("Error while updating profile.", err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }]
@@ -165,7 +161,6 @@ exports.changePassword = [
       await user.save();
       return res.status(200).json({ message: "Password updated successfully" });
     } catch (err) {
-      console.log("Error while updating password", err);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }]
@@ -191,7 +186,6 @@ exports.uploadAvatar = async (req, res) => {
     await user.save();
     return res.status(200).json({ message: "Avatar uploaded", user: { _id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, avatar: user.avatar } });
   } catch (err) {
-    console.error("Error uploading avatar", err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };

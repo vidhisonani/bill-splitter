@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HiOutlineTrash } from 'react-icons/hi2';
 import toast from "react-hot-toast";
@@ -24,6 +24,28 @@ export default function DeleteGroupModal({ groupId, group }) {
       setShowDeleteModal(false);
     }
   }
+
+  useEffect(() => {
+    if (!showDeleteModal) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyPaddingRight = document.body.style.paddingRight;
+    const scrollBarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    if (scrollBarWidth > 0) {
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.paddingRight = previousBodyPaddingRight;
+    };
+  }, [showDeleteModal]);
 
   return (
     <>
